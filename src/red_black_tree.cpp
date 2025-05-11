@@ -134,7 +134,12 @@ public:
     return (cur_node->parent_node->color == 'R');
   }
 
-  bool isBlack(Node *sibling_node) { return (sibling_node->color == 'B'); }
+  bool isBlack(Node *sibling_node) {
+    if (sibling_node == nullptr || sibling_node->color == 'B') {
+      return true;
+    }
+    return false;
+  }
 
   Node *sibling(Node *cur_node) {
     Node *par_node = cur_node->parent_node;
@@ -147,7 +152,6 @@ public:
   }
 
   Node *restructure(Node *cur_node) {
-    cout << "Invoked!" << endl;
     Node *par_node = cur_node->parent_node;
     Node *grand_par_node = par_node->parent_node;
 
@@ -184,7 +188,6 @@ public:
         rotateRight(grand_par_node);
       }
     }
-    cout << tree_root->key.first << endl;
   }
 
   void *rotateRight(Node *old_root) {

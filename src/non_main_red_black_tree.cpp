@@ -40,7 +40,7 @@ public:
 
 class RBT {
 public:
-  RBT() : root(nullptr), tree_size(0) {}
+  RBT() : tree_root(nullptr), tree_size(0) {}
 
   void insert(const int &sid, const string &subject, const string &sname,
               const int &semester, const string &phone, const int &timestamp) {
@@ -49,13 +49,13 @@ public:
     // If new_node is a root
     if (tree_size == 0) {
       new_node->color = 'B';
-      root = new_node;
+      tree_root = new_node;
       tree_size++;
       return;
     }
 
     // 삽입할 위치의 부모를 찾자.
-    pair<Node *, char> par_location = binarySearch(root, new_node->key);
+    pair<Node *, char> par_location = binarySearch(tree_root, new_node->key);
     if (par_location.first == nullptr) {
       cout << "Insertion error! You must solve this problem." << endl;
       return;
@@ -132,7 +132,12 @@ public:
     return (cur_node->parent_node->color == 'R');
   }
 
-  bool isBlack(Node *sibling_node) { return (sibling_node->color == 'B'); }
+  bool isBlack(Node *sibling_node) {
+    if (sibling_node == nullptr || sibling_node->color == 'B') {
+      return true;
+    }
+    return false;
+  }
 
   Node *sibling(Node *cur_node) {
     Node *par_node = cur_node->parent_node;
@@ -144,10 +149,125 @@ public:
     }
   }
 
-  Node *restructure(Node *cur_node) {}
-  Node *recolor(Node *cur_node) {}
+  Node *restructure(Node *cur_node) {
+    Node *par_node = cur_node->parent_node;
+    Node *grand_par_node = par_node->parent_node;
+
+    if (grand_par_node->right_child == par_node) {
+      // RL
+      if (par_node->left_child == cur_node) {
+        cur_node->color = 'B';
+        par_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateRight(par_node);
+        rotateLeft(grand_par_node);
+      }
+      // RR
+      else {
+        par_node->color = 'B';
+        cur_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateLeft(grand_par_node);
+      }
+    } else {
+      // LL
+      if (par_node->left_child == par_node) {
+        par_node->color = 'B';
+        cur_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateRight(grand_par_node);
+      }
+      // LR
+      else {
+        cur_node->color = 'B';
+        par_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateLeft(par_node);
+        rotateRight(grand_par_node);
+      }
+    }
+  }
+
+  void *rotateRight(Node *old_root) {
+    Node *new_root = old_root->left_child;
+    Node *middle_subtree = new_root->right_child;
+
+    new_root->right_child = old_root;
+    old_root->left_child = middle_subtree;
+
+    if (middle_subtree) {
+      middle_subtree->parent_node = old_root;
+    }
+    new_root->parent_node = old_root->parent_node;
+    old_root->parent_node = new_root;
+
+    if (new_root->parent_node) {
+      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+        new_root->parent_node->right_child = new_root;
+      }
+      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+        new_root->parent_node->left_child = new_root;
+      }
+    }
+
+    if (new_root->parent_node == nullptr) {
+      tree_root = new_root;
+    }
+  }
+
+  void *rotateLeft(Node *old_root) {
+    Node *new_root = old_root->right_child;
+    Node *middle_subtree = new_root->left_child;
+
+    new_root->left_child = old_root;
+    old_root->right_child = middle_subtree;
+
+    if (middle_subtree) {
+      middle_subtree->parent_node = old_root;
+    }
+    new_root->parent_node = old_root->parent_node;
+    old_root->parent_node = new_root;
+
+    if (new_root->parent_node) {
+      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+        new_root->parent_node->right_child = new_root;
+      }
+      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+        new_root->parent_node->left_child = new_root;
+      }
+    }
+
+    if (new_root->parent_node == nullptr) {
+      tree_root = new_root;
+    }
+  }
+
+  Node *recolor(Node *cur_node) {
+    Node *par_node = cur_node->parent_node;
+    Node *grand_par_node = par_node->parent_node;
+
+    exchangeColor(cur_node);
+    exchangeColor(par_node);
+    exchangeColor(grand_par_node);
+
+    if (grand_par_node == tree_root && grand_par_node->color == 'R') {
+      grand_par_node->color = 'B';
+    }
+  }
+
+  void exchangeColor(Node *node) {
+    char cur_color = node->color;
+    switch (cur_color) {
+    case 'R':
+      node->color = 'B';
+      break;
+    case 'B':
+      node->color = 'R';
+      break;
+    }
+  }
 
 private:
-  Node *root;
+  Node *tree_root;
   int tree_size;
 };
