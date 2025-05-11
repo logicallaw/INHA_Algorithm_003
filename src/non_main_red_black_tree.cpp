@@ -123,6 +123,12 @@ public:
   }
 
   bool doubleRed(Node *cur_node) {
+    if (cur_node->color == 'B') {
+      return false;
+    }
+    if (cur_node->parent_node == nullptr) {
+      return false;
+    }
     return (cur_node->parent_node->color == 'R');
   }
 
