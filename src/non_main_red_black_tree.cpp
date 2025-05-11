@@ -135,14 +135,12 @@ public:
   bool isBlack(Node *sibling_node) { return (sibling_node->color == 'B'); }
 
   Node *sibling(Node *cur_node) {
-    Node *curParent_node = cur_node->parent_node;
-    Node *grand_parent_node = curParent_node->parent_node;
-
-    if (grand_parent_node->left_child == curParent_node) {
-      return grand_parent_node->right_child;
+    Node *par_node = cur_node->parent_node;
+    if (par_node->left_child == cur_node) {
+      return par_node->right_child;
     }
-    if (grand_parent_node->right_child == curParent_node) {
-      return grand_parent_node->left_child;
+    if (par_node->right_child == cur_node) {
+      return par_node->left_child;
     }
   }
 

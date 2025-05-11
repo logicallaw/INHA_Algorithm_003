@@ -10,62 +10,46 @@
 #include "../src/non_main_red_black_tree.cpp"
 #include <gtest/gtest.h>
 
-// Output: grandparent's left child.
+// Case1: return node1's left child(node3's sibling).
 TEST(RBTSibling, Test1) {
-  Node *grand_parent_node =
+  Node *node1 =
       new Node(12210795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
-  grand_parent_node->color = 'B';
+  Node *node2 =
+      new Node(12200795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
+  Node *node3 =
+      new Node(12220795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
 
-  Node *parLeft_child =
-      new Node(12200795, "Misaso", "Lee", 6, "01012341234", 1811516800);
-  Node *parRight_child =
-      new Node(12220795, "Algorithm", "Park", 6, "01012341234", 1911516800);
+  node1->color = 'B';
+  node1->left_child = node2;
+  node2->parent_node = node1;
 
-  parLeft_child->parent_node = grand_parent_node;
-  grand_parent_node->left_child = parLeft_child;
-
-  parRight_child->parent_node = grand_parent_node;
-  grand_parent_node->right_child = parRight_child;
-
-  Node *rightChild_right_child =
-      new Node(12230795, "Algorithm", "Kim", 3, "01012341234", 1921516800);
-
-  rightChild_right_child->parent_node = parRight_child;
-  parRight_child->right_child = rightChild_right_child;
+  node1->right_child = node3;
+  node3->parent_node = node1;
 
   RBT *rbt = new RBT();
-
-  Node *found_sibling = rbt->sibling(rightChild_right_child);
-  EXPECT_EQ(found_sibling, parLeft_child);
+  Node *result = rbt->sibling(node3);
+  EXPECT_EQ(result, node2);
 }
 
-// Output: grandparent's right child.
+// Case2: return node1's right child(node2's sibling).
 TEST(RBTSibling, Test2) {
-  Node *grand_parent_node =
+  Node *node1 =
       new Node(12210795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
-  grand_parent_node->color = 'B';
+  Node *node2 =
+      new Node(12200795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
+  Node *node3 =
+      new Node(12220795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
 
-  Node *parLeft_child =
-      new Node(12200795, "Misaso", "Lee", 6, "01012341234", 1811516800);
-  Node *parRight_child =
-      new Node(12220795, "Algorithm", "Park", 6, "01012341234", 1911516800);
+  node1->color = 'B';
+  node1->left_child = node2;
+  node2->parent_node = node1;
 
-  parLeft_child->parent_node = grand_parent_node;
-  grand_parent_node->left_child = parLeft_child;
-
-  parRight_child->parent_node = grand_parent_node;
-  grand_parent_node->right_child = parRight_child;
-
-  Node *leftChild_right_child =
-      new Node(12230795, "Algorithm", "Kim", 3, "01012341234", 1921516800);
-
-  leftChild_right_child->parent_node = parLeft_child;
-  parLeft_child->right_child = leftChild_right_child;
+  node1->right_child = node3;
+  node3->parent_node = node1;
 
   RBT *rbt = new RBT();
-
-  Node *found_sibling = rbt->sibling(leftChild_right_child);
-  EXPECT_EQ(found_sibling, parRight_child);
+  Node *result = rbt->sibling(node2);
+  EXPECT_EQ(result, node3);
 }
 
 int main(int argc, char **argv) {
