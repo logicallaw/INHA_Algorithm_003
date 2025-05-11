@@ -10,7 +10,7 @@
 #include "../src/non_main_red_black_tree.cpp"
 #include <gtest/gtest.h>
 
-// If sibling_node's color is red...
+// If sibling_node's color is red,
 TEST(RBTIsBlack, Test1) {
   Node *silbling_node =
       new Node(12210795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
@@ -22,7 +22,7 @@ TEST(RBTIsBlack, Test1) {
   EXPECT_EQ(isBlack, false);
 }
 
-// If sibling_node's color is black...
+// If sibling_node's color is black,
 TEST(RBTIsBlack, Test2) {
   Node *silbling_node =
       new Node(12210795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
