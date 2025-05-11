@@ -21,3 +21,6 @@ target_link_libraries(RBTIsBlackTest ${GTEST_LIBRARIES} pthread)
 
 add_executable(RBTDoubleRedTest test/double_red_test.cpp)
 target_link_libraries(RBTDoubleRedTest ${GTEST_LIBRARIES} pthread)
+
+add_executable(RBTBinarySearchTest test/binary_search_test.cpp)
+target_link_libraries(RBTBinarySearchTest ${GTEST_LIBRARIES} pthread)
