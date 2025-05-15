@@ -5,10 +5,13 @@
  * For full license text, see the LICENSE file in the root directory or at
  * https://opensource.org/license/mit
  * Author: Junho Kim
- * Latest Updated Date: 2025-05-11
+ * Latest Updated Date: 2025-05-15
  */
+#include <algorithm>
 #include <iostream>
+#include <map>
 #include <string>
+#include <vector>
 using namespace std;
 
 // Define enum.
@@ -41,7 +44,7 @@ private:
 
 class RBT {
 public:
-  RBT() : tree_root(nullptr), tree_size(0) {}
+  RBT() : tree_root(nullptr), tree_size(0), sid_map({}) {}
 
   void insert(const int &sid, const string &subject, const string &sname,
               const int &semester, const string &phone, const int &timestamp) {
@@ -51,8 +54,12 @@ public:
     if (tree_size == 0) {
       Node *new_node =
           new Node(sid, subject, sname, semester, phone, timestamp);
+      vector<pair<string, Node *>> new_node_vector;
+      new_node_vector.push_back(pair<string, Node *>(subject, new_node));
+
       new_node->color = 'B';
       tree_root = new_node;
+      sid_map.insert({sid, new_node_vector});
       tree_size++;
       cout << "0 0\n";
       return;
@@ -66,10 +73,10 @@ public:
       return;
     }
 
-    bool does_exist = false;
+    bool does_exist_new_node = false;
     if (searched_result.first->key == new_node->key) {
       searched_result.first->timestamp = timestamp;
-      does_exist = true;
+      does_exist_new_node = true;
     } else {
       // Update parent-child relation.
       new_node->parent_node = searched_result.first;
@@ -95,10 +102,16 @@ public:
         }
       }
     }
-
+    pair<string, Node *> new_node_pair(subject, new_node);
+    if (sid_map.find(sid) != sid_map.end()) {
+      sid_map[sid].push_back(new_node_pair);
+    } else {
+      vector<pair<string, Node *>> new_node_vector;
+      new_node_vector.push_back(new_node_pair);
+      sid_map.insert({sid, new_node_vector});
+    }
     int new_node_depth = getNodeDepth(new_node);
-
-    cout << new_node_depth << " " << does_exist << "\n";
+    cout << new_node_depth << " " << does_exist_new_node << "\n";
   }
 
   // Find cur_node's parent node.
@@ -296,9 +309,33 @@ public:
     }
   }
 
+  void inquireAllSubjects(const int &sid) {
+    // If existed
+    if (sid_map.find(sid) != sid_map.end()) {
+      vector<pair<string, Node *>> &sid_vector = sid_map[sid];
+
+      // sorted by subject name
+      sort(sid_vector.begin(), sid_vector.end(), subjectNameLess);
+
+      for (const pair<string, Node *> &ele : sid_vector) {
+        cout << ele.first << " " << ele.second->color << " ";
+      }
+      cout << "\n";
+
+      return;
+    }
+    cout << "No records found\n";
+  }
+
+  static bool subjectNameLess(const pair<string, Node *> &a,
+                              const pair<string, Node *> &b) {
+    return a.first < b.first;
+  }
+
 private:
   Node *tree_root;
   int tree_size;
+  map<int, vector<pair<string, Node *>>> sid_map;
 };
 
 int main() {
@@ -326,13 +363,12 @@ int main() {
       continue;
     }
 
-    if (query_type == 'D') {
-
-      continue;
-    }
-
     if (query_type == 'L') {
+      int sid;
 
+      cin >> sid;
+
+      red_black_tree->inquireAllSubjects(sid);
       continue;
     }
 
