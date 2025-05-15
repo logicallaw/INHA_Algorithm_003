@@ -106,9 +106,13 @@ public:
         }
       }
     }
-
-    int new_node_depth = getNodeDepth(new_node);
-    cout << new_node_depth << " " << does_exist_new_node << "\n";
+    if (does_exist_new_node) {
+      int node_depth = getNodeDepth(searched_result.first);
+      cout << node_depth << " " << does_exist_new_node << "\n";
+    } else {
+      int new_node_depth = getNodeDepth(new_node);
+      cout << new_node_depth << " " << does_exist_new_node << "\n";
+    }
   }
 
   // Find cur_node's parent node.
@@ -119,13 +123,13 @@ public:
       return pair<Node *, char>(nullptr, 'E');
     }
 
-    if (comparator(cur_node->key, key) < 0) {
+    if (comparator(cur_node->key, key) > 0) {
       if (cur_node->left_child != nullptr) {
         return searchParentOrSelf(cur_node->left_child, key);
       }
       return pair<Node *, char>(cur_node, 'L');
     }
-    if (comparator(cur_node->key, key) > 0) {
+    if (comparator(cur_node->key, key) < 0) {
       if (cur_node->right_child != nullptr) {
         return searchParentOrSelf(cur_node->right_child, key);
       }
@@ -138,18 +142,19 @@ public:
   int comparator(const pair<int, string> &comp1,
                  const pair<int, string> &comp2) {
     if (comp1.first < comp2.first) {
-      return 1;
+      return -1;
     }
     if (comp1.first > comp2.first) {
-      return -1;
+      return 1;
     }
     // { comp1.first == comp2.first }
     if (comp1.second < comp2.second) {
-      return 1;
-    }
-    if (comp1.second > comp2.second) {
       return -1;
     }
+    if (comp1.second > comp2.second) {
+      return 1;
+    }
+    return 0;
   }
 
   bool doubleRed(Node *cur_node) {
@@ -174,9 +179,7 @@ public:
     if (par_node->left_child == cur_node) {
       return par_node->right_child;
     }
-    if (par_node->right_child == cur_node) {
-      return par_node->left_child;
-    }
+    return par_node->left_child;
   }
 
   Node *restructure(Node *cur_node) {
@@ -190,14 +193,14 @@ public:
         par_node->color = 'R';
         grand_par_node->color = 'R';
         rotateRight(par_node);
-        rotateLeft(grand_par_node);
+        return rotateLeft(grand_par_node);
       }
       // RR
       else {
         par_node->color = 'B';
         cur_node->color = 'R';
         grand_par_node->color = 'R';
-        rotateLeft(grand_par_node);
+        return rotateLeft(grand_par_node);
       }
     } else {
       // LL
@@ -205,7 +208,7 @@ public:
         par_node->color = 'B';
         cur_node->color = 'R';
         grand_par_node->color = 'R';
-        rotateRight(grand_par_node);
+        return rotateRight(grand_par_node);
       }
       // LR
       else {
@@ -213,12 +216,12 @@ public:
         par_node->color = 'R';
         grand_par_node->color = 'R';
         rotateLeft(par_node);
-        rotateRight(grand_par_node);
+        return rotateRight(grand_par_node);
       }
     }
   }
 
-  void *rotateRight(Node *old_root) {
+  Node *rotateRight(Node *old_root) {
     Node *new_root = old_root->left_child;
     Node *middle_subtree = new_root->right_child;
 
@@ -232,10 +235,10 @@ public:
     old_root->parent_node = new_root;
 
     if (new_root->parent_node) {
-      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
         new_root->parent_node->right_child = new_root;
       }
-      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
         new_root->parent_node->left_child = new_root;
       }
     }
@@ -243,9 +246,10 @@ public:
     if (new_root->parent_node == nullptr) {
       tree_root = new_root;
     }
+    return new_root;
   }
 
-  void *rotateLeft(Node *old_root) {
+  Node *rotateLeft(Node *old_root) {
     Node *new_root = old_root->right_child;
     Node *middle_subtree = new_root->left_child;
 
@@ -259,10 +263,10 @@ public:
     old_root->parent_node = new_root;
 
     if (new_root->parent_node) {
-      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
         new_root->parent_node->right_child = new_root;
       }
-      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
         new_root->parent_node->left_child = new_root;
       }
     }
@@ -270,6 +274,7 @@ public:
     if (new_root->parent_node == nullptr) {
       tree_root = new_root;
     }
+    return new_root;
   }
 
   int getNodeDepth(Node *cur_node) {
@@ -292,6 +297,7 @@ public:
     if (grand_par_node == tree_root && grand_par_node->color == 'R') {
       grand_par_node->color = 'B';
     }
+    return grand_par_node;
   }
 
   void exchangeColor(Node *node) {
