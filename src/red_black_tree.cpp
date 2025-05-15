@@ -248,9 +248,9 @@ public:
     Node *par_node = cur_node->parent_node;
     Node *grand_par_node = par_node->parent_node;
 
-    exchangeColor(cur_node);
-    exchangeColor(par_node);
     exchangeColor(grand_par_node);
+    exchangeColor(par_node);
+    exchangeColor(sibling(par_node));
 
     if (grand_par_node == tree_root && grand_par_node->color == 'R') {
       grand_par_node->color = 'B';
