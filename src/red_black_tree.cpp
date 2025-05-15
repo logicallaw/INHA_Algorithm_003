@@ -30,7 +30,6 @@ private:
   string phone;
   int timestamp;
 
-  int depth;
   Node *parent_node;
   Node *left_child;
   Node *right_child;
@@ -50,61 +49,80 @@ public:
 
     // If new_node is a root
     if (tree_size == 0) {
+      Node *new_node =
+          new Node(sid, subject, sname, semester, phone, timestamp);
       new_node->color = 'B';
       tree_root = new_node;
       tree_size++;
+      cout << "0 0\n";
       return;
     }
 
     // 삽입할 위치의 부모를 찾자.
-    pair<Node *, char> par_location = binarySearch(tree_root, new_node->key);
-    if (par_location.first == nullptr) {
+    pair<Node *, char> searched_result =
+        searchParentOrSelf(tree_root, new_node->key);
+    if (searched_result.first == nullptr) {
       cout << "Insertion error! You must solve this problem." << endl;
       return;
     }
 
-    // Update parent-child relation.
-    new_node->parent_node = par_location.first;
+    bool does_exist = false;
+    if (searched_result.first->key == new_node->key) {
+      searched_result.first->timestamp = timestamp;
+      does_exist = true;
+    } else {
+      // Update parent-child relation.
+      new_node->parent_node = searched_result.first;
 
-    if (par_location.second == 'L') {
-      par_location.first->left_child = new_node;
-    }
-    if (par_location.second == 'R') {
-      par_location.first->right_child = new_node;
-    }
-    tree_size++;
+      if (searched_result.second == 'L') {
+        searched_result.first->left_child = new_node;
+      }
+      if (searched_result.second == 'R') {
+        searched_result.first->right_child = new_node;
+      }
+      tree_size++;
 
-    // Check ordering condition.
-    while (doubleRed(new_node)) {
-      if (isBlack(sibling(new_node->parent_node))) {
-        new_node = restructure(new_node);
-        break;
-      }
-      // { sibling(new_node->parent_node) is red }
-      else {
-        new_node = recolor(new_node);
+      // Check ordering condition.
+      Node *cur_node = new_node;
+      while (doubleRed(cur_node)) {
+        if (isBlack(sibling(cur_node->parent_node))) {
+          cur_node = restructure(cur_node);
+          break;
+        }
+        // { sibling(new_node->parent_node) is red }
+        else {
+          cur_node = recolor(cur_node);
+        }
       }
     }
+
+    int new_node_depth = getNodeDepth(new_node);
+
+    cout << new_node_depth << " " << does_exist << "\n";
   }
 
-  pair<Node *, char> binarySearch(Node *cur_node,
-                                  const pair<int, string> &key) {
+  // Find cur_node's parent node.
+  // Return value's categories: nullptr, parent node, existing node
+  pair<Node *, char> searchParentOrSelf(Node *cur_node,
+                                        const pair<int, string> &key) {
     if (cur_node == nullptr) {
       return pair<Node *, char>(nullptr, 'E');
     }
 
     if (comparator(cur_node->key, key) < 0) {
       if (cur_node->left_child != nullptr) {
-        return binarySearch(cur_node->left_child, key);
+        return searchParentOrSelf(cur_node->left_child, key);
       }
       return pair<Node *, char>(cur_node, 'L');
     }
     if (comparator(cur_node->key, key) > 0) {
       if (cur_node->right_child != nullptr) {
-        return binarySearch(cur_node->right_child, key);
+        return searchParentOrSelf(cur_node->right_child, key);
       }
       return pair<Node *, char>(cur_node, 'R');
     }
+    // { If it's already exist, return self node. }
+    return pair<Node *, char>(cur_node, 'A');
   }
 
   int comparator(const pair<int, string> &comp1,
@@ -242,6 +260,15 @@ public:
     if (new_root->parent_node == nullptr) {
       tree_root = new_root;
     }
+  }
+
+  int getNodeDepth(Node *cur_node) {
+    int depth = 0;
+    while (cur_node->parent_node != nullptr) {
+      cur_node = cur_node->parent_node;
+      depth++;
+    }
+    return depth;
   }
 
   Node *recolor(Node *cur_node) {

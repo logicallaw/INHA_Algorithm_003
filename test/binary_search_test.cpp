@@ -17,7 +17,7 @@ TEST(RBTBinarySearchTest, Test1) {
 
   RBT *rbt = new RBT();
 
-  pair<Node *, char> par_node = rbt->binarySearch(cur_node, key);
+  pair<Node *, char> par_node = rbt->searchParentOrSelf(cur_node, key);
   pair<Node *, char> expected_value(nullptr, 'E');
   EXPECT_EQ(par_node, expected_value);
 }
@@ -55,7 +55,7 @@ TEST(RBTBinarySearchTest, Test2) {
       new Node(12231795, "Algorithm", "Kim", 5, "01045678901", 2011516800);
 
   RBT *rbt = new RBT();
-  pair<Node *, char> result = rbt->binarySearch(root, new_node->key);
+  pair<Node *, char> result = rbt->searchParentOrSelf(root, new_node->key);
   EXPECT_EQ(result.first, node5);
   EXPECT_EQ(result.second, 'R');
 }
@@ -93,7 +93,7 @@ TEST(RBTBinarySearchTest, Test3) {
       new Node(12221795, "Algorithm", "Kim", 5, "01045678901", 2011516800);
 
   RBT *rbt = new RBT();
-  pair<Node *, char> result = rbt->binarySearch(root, new_node->key);
+  pair<Node *, char> result = rbt->searchParentOrSelf(root, new_node->key);
   EXPECT_EQ(result.first, node5);
   EXPECT_EQ(result.second, 'L');
 }
@@ -131,7 +131,7 @@ TEST(RBTBinarySearchTest, Test4) {
       new Node(12211795, "Algorithm", "Kim", 5, "01045678901", 2011516800);
 
   RBT *rbt = new RBT();
-  pair<Node *, char> result = rbt->binarySearch(root, new_node->key);
+  pair<Node *, char> result = rbt->searchParentOrSelf(root, new_node->key);
   EXPECT_EQ(result.first, node3);
   EXPECT_EQ(result.second, 'L');
 }
@@ -169,7 +169,7 @@ TEST(RBTBinarySearchTest, Test5) {
       new Node(12201795, "Algorithm", "Kim", 5, "01045678901", 2011516800);
 
   RBT *rbt = new RBT();
-  pair<Node *, char> result = rbt->binarySearch(root, new_node->key);
+  pair<Node *, char> result = rbt->searchParentOrSelf(root, new_node->key);
   EXPECT_EQ(result.first, node2);
   EXPECT_EQ(result.second, 'R');
 }
@@ -207,7 +207,7 @@ TEST(RBTBinarySearchTest, Test6) {
       new Node(12190695, "Algorithm", "Kim", 5, "01045678901", 2011516800);
 
   RBT *rbt = new RBT();
-  pair<Node *, char> result = rbt->binarySearch(root, new_node->key);
+  pair<Node *, char> result = rbt->searchParentOrSelf(root, new_node->key);
   EXPECT_EQ(result.first, node4);
   EXPECT_EQ(result.second, 'L');
 }
@@ -245,7 +245,7 @@ TEST(RBTBinarySearchTest, Test7) {
       new Node(12191695, "Algorithm", "Kim", 5, "01045678901", 2011516800);
 
   RBT *rbt = new RBT();
-  pair<Node *, char> result = rbt->binarySearch(root, new_node->key);
+  pair<Node *, char> result = rbt->searchParentOrSelf(root, new_node->key);
   EXPECT_EQ(result.first, node4);
   EXPECT_EQ(result.second, 'R');
 }

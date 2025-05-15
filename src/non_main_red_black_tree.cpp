@@ -55,7 +55,8 @@ public:
     }
 
     // 삽입할 위치의 부모를 찾자.
-    pair<Node *, char> par_location = binarySearch(tree_root, new_node->key);
+    pair<Node *, char> par_location =
+        searchParentOrSelf(tree_root, new_node->key);
     if (par_location.first == nullptr) {
       cout << "Insertion error! You must solve this problem." << endl;
       return;
@@ -85,21 +86,21 @@ public:
     }
   }
 
-  pair<Node *, char> binarySearch(Node *cur_node,
-                                  const pair<int, string> &key) {
+  pair<Node *, char> searchParentOrSelf(Node *cur_node,
+                                        const pair<int, string> &key) {
     if (cur_node == nullptr) {
       return pair<Node *, char>(nullptr, 'E');
     }
 
     if (comparator(cur_node->key, key) < 0) {
       if (cur_node->left_child != nullptr) {
-        return binarySearch(cur_node->left_child, key);
+        return searchParentOrSelf(cur_node->left_child, key);
       }
       return pair<Node *, char>(cur_node, 'L');
     }
     if (comparator(cur_node->key, key) > 0) {
       if (cur_node->right_child != nullptr) {
-        return binarySearch(cur_node->right_child, key);
+        return searchParentOrSelf(cur_node->right_child, key);
       }
       return pair<Node *, char>(cur_node, 'R');
     }
