@@ -15,7 +15,7 @@ TEST(RBTIsBlack, Test1) {
   Node *silbling_node =
       new Node(12210795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
 
   bool isBlack = rbt->isBlack(silbling_node);
 
@@ -28,7 +28,7 @@ TEST(RBTIsBlack, Test2) {
       new Node(12210795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
   silbling_node->color = 'B';
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
 
   bool isBlack = rbt->isBlack(silbling_node);
 

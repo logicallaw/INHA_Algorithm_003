@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the root directory or at
  * https://opensource.org/license/mit
  * Author: Junho Kim
- * Latest Updated Date: 2025-05-15
+ * Latest Updated Date: 2025-05-16
  */
 #include <algorithm>
 #include <iostream>
@@ -15,8 +15,14 @@
 using namespace std;
 
 // Define enum.
+enum class QueryType : char {
+  kInsert = 'I',
+  kListSubjects = 'L',
+  kCountStudents = 'C',
+  kEarliestApplicants = 'M'
+};
 
-class RBT;
+class RedBlackTree;
 
 class Node {
 public:
@@ -39,12 +45,13 @@ private:
 
   char color;
 
-  friend class RBT;
+  friend class RedBlackTree;
 };
 
-class RBT {
+class RedBlackTree {
 public:
-  RBT() : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
+  RedBlackTree()
+      : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
 
   void insert(const int &sid, const string &subject, const string &sname,
               const int &semester, const string &phone, const int &timestamp) {
@@ -421,13 +428,13 @@ int main() {
   int test_case;
   cin >> test_case;
 
-  RBT *red_black_tree = new RBT();
+  RedBlackTree *red_black_tree = new RedBlackTree();
 
   while (test_case--) {
     char query_type;
     cin >> query_type;
 
-    if (query_type == 'I') {
+    if (query_type == static_cast<char>(QueryType::kInsert)) {
       int sid, semester, timestamp;
       string subject, sname, phone;
 
@@ -438,7 +445,7 @@ int main() {
       continue;
     }
 
-    if (query_type == 'L') {
+    if (query_type == static_cast<char>(QueryType::kListSubjects)) {
       int sid;
 
       cin >> sid;
@@ -447,7 +454,7 @@ int main() {
       continue;
     }
 
-    if (query_type == 'C') {
+    if (query_type == static_cast<char>(QueryType::kCountStudents)) {
       string subject;
 
       cin >> subject;
@@ -456,7 +463,7 @@ int main() {
       continue;
     }
 
-    if (query_type == 'M') {
+    if (query_type == static_cast<char>(QueryType::kEarliestApplicants)) {
       string subject;
       int k;
 

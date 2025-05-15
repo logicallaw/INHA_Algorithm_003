@@ -13,7 +13,7 @@ using namespace std;
 
 // Define enum.
 
-class RBT;
+class RedBlackTree;
 
 class Node {
 public:
@@ -35,12 +35,12 @@ public:
 
   char color;
 
-  friend class RBT;
+  friend class RedBlackTree;
 };
 
-class RBT {
+class RedBlackTree {
 public:
-  RBT() : tree_root(nullptr), tree_size(0) {}
+  RedBlackTree() : tree_root(nullptr), tree_size(0) {}
 
   void insert(const int &sid, const string &subject, const string &sname,
               const int &semester, const string &phone, const int &timestamp) {

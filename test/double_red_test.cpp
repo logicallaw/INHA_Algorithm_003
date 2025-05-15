@@ -17,7 +17,7 @@ TEST(RBTDoubleRed, Test1) {
 
   node1->color = 'B';
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
 
   bool isDoubleRed = rbt->doubleRed(node1);
   EXPECT_EQ(isDoubleRed, false);
@@ -28,7 +28,7 @@ TEST(RBTDoubleRed, Test2) {
   Node *node1 =
       new Node(12210795, "Algorithm", "Kim", 6, "01012341234", 1711516800);
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
 
   bool isDoubleRed = rbt->doubleRed(node1);
   EXPECT_EQ(isDoubleRed, false);
@@ -44,7 +44,7 @@ TEST(RBTDoubleRed, Test3) {
   node1->left_child = node2;
   node2->parent_node = node1;
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
 
   bool isDoubleRed = rbt->doubleRed(node2);
   EXPECT_EQ(isDoubleRed, true);
@@ -61,7 +61,7 @@ TEST(RBTDoubleRed, Test4) {
   node1->left_child = node2;
   node2->parent_node = node1;
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
 
   bool isDoubleRed = rbt->doubleRed(node2);
   EXPECT_EQ(isDoubleRed, false);

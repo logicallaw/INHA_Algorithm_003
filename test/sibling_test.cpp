@@ -26,7 +26,7 @@ TEST(RBTSibling, Test1) {
   node1->right_child = node3;
   node3->parent_node = node1;
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
   Node *result = rbt->sibling(node3);
   EXPECT_EQ(result, node2);
 }
@@ -47,7 +47,7 @@ TEST(RBTSibling, Test2) {
   node1->right_child = node3;
   node3->parent_node = node1;
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
   Node *result = rbt->sibling(node2);
   EXPECT_EQ(result, node3);
 }

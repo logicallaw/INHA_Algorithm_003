@@ -14,7 +14,7 @@ TEST(RBTComparator, Test1) {
   pair<int, string> comp1(12200795, "Algorithm");
   pair<int, string> comp2(12210795, "Misaso");
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
   int result = rbt->comparator(comp1, comp2);
   EXPECT_EQ(result, 1);
 }
@@ -23,7 +23,7 @@ TEST(RBTComparator, Test2) {
   pair<int, string> comp1(12220795, "Algorithm");
   pair<int, string> comp2(12210795, "Misaso");
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
   int result = rbt->comparator(comp1, comp2);
   EXPECT_EQ(result, -1);
 }
@@ -32,7 +32,7 @@ TEST(RBTComparator, Test3) {
   pair<int, string> comp1(12210795, "Algorithm");
   pair<int, string> comp2(12210795, "Misaso");
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
   int result = rbt->comparator(comp1, comp2);
   EXPECT_EQ(result, 1);
 }
@@ -41,7 +41,7 @@ TEST(RBTComparator, Test4) {
   pair<int, string> comp1(12210795, "Misaso");
   pair<int, string> comp2(12210795, "Algorith");
 
-  RBT *rbt = new RBT();
+  RedBlackTree *rbt = new RedBlackTree();
   int result = rbt->comparator(comp1, comp2);
   EXPECT_EQ(result, -1);
 }
