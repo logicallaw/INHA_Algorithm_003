@@ -44,7 +44,7 @@ private:
 
 class RBT {
 public:
-  RBT() : tree_root(nullptr), tree_size(0), sid_map({}) {}
+  RBT() : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
 
   void insert(const int &sid, const string &subject, const string &sname,
               const int &semester, const string &phone, const int &timestamp) {
@@ -56,6 +56,7 @@ public:
           new Node(sid, subject, sname, semester, phone, timestamp);
 
       addNewVectorInSidMap(sid, subject, new_node);
+      addStudentInfoInSubjectMap(subject, new_node);
 
       new_node->color = 'B';
       tree_root = new_node;
@@ -90,6 +91,7 @@ public:
       tree_size++;
 
       addNewVectorInSidMap(sid, subject, new_node);
+      addStudentInfoInSubjectMap(subject, new_node);
 
       // Check ordering condition.
       Node *cur_node = new_node;
@@ -333,19 +335,51 @@ public:
 
     if (sid_map.find(sid) != sid_map.end()) {
       sid_map[sid].push_back(new_node_pair);
-    } else {
-      vector<pair<string, Node *>> new_node_vector;
-      new_node_vector.push_back(new_node_pair);
-      sid_map.insert({sid, new_node_vector});
+      return;
+    }
+    vector<pair<string, Node *>> new_node_vector;
+    new_node_vector.push_back(new_node_pair);
+    sid_map.insert({sid, new_node_vector});
+  }
+
+  void addStudentInfoInSubjectMap(const string &subject, Node *new_node) {
+    if (subject_map.find(subject) == subject_map.end()) {
+      vector<Node *> new_vector;
+      new_vector.push_back(new_node);
+
+      subject_map.insert({subject, new_vector});
+      return;
+    }
+    vector<Node *> &subject_vector = subject_map[subject];
+    if (find(subject_vector.begin(), subject_vector.end(), new_node) ==
+        subject_vector.end()) {
+      subject_map[subject].push_back(new_node);
     }
   }
 
-  void inquireStudentNumberOfSubject(const string &subject) {}
+  void inquireStudentNumberOfSubject(const string &subject) {
+    if (subject_map.find(subject) != subject_map.end()) {
+      const vector<Node *> &subject_vector = subject_map[subject];
+      const int student_number_of_subject = subject_vector.size();
+
+      int depth_sum = 0;
+      for (Node *ele : subject_vector) {
+        depth_sum += getNodeDepth(ele);
+      }
+
+      cout << student_number_of_subject << " " << depth_sum << "\n";
+    } else {
+      cout << "Inquire student number of subject error! You must solve this "
+              "problem."
+           << endl;
+    }
+  }
 
 private:
   Node *tree_root;
   int tree_size;
   map<int, vector<pair<string, Node *>>> sid_map;
+  map<string, vector<Node *>> subject_map;
 };
 
 int main() {
