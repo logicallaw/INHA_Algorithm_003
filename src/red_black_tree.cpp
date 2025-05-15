@@ -329,6 +329,10 @@ public:
     return a.first < b.first;
   }
 
+  static bool timestampLess(Node *&a, Node *&b) {
+    return a->timestamp < b->timestamp;
+  }
+
   void addNewVectorInSidMap(const int &sid, const string &subject,
                             Node *new_node) {
     pair<string, Node *> new_node_pair(subject, new_node);
@@ -345,6 +349,7 @@ public:
   void addStudentInfoInSubjectMap(const string &subject, Node *new_node) {
     if (subject_map.find(subject) == subject_map.end()) {
       vector<Node *> new_vector;
+
       new_vector.push_back(new_node);
 
       subject_map.insert({subject, new_vector});
@@ -360,16 +365,38 @@ public:
   void inquireStudentNumberOfSubject(const string &subject) {
     if (subject_map.find(subject) != subject_map.end()) {
       const vector<Node *> &subject_vector = subject_map[subject];
+
       const int student_number_of_subject = subject_vector.size();
 
       int depth_sum = 0;
       for (Node *ele : subject_vector) {
         depth_sum += getNodeDepth(ele);
       }
-
       cout << student_number_of_subject << " " << depth_sum << "\n";
     } else {
       cout << "Inquire student number of subject error! You must solve this "
+              "problem."
+           << endl;
+    }
+  }
+
+  void inquireEarlyStudent(const string &subject, const int &k) {
+    if (subject_map.find(subject) != subject_map.end()) {
+      vector<Node *> &subject_vector = subject_map[subject];
+
+      const int subject_vector_size = subject_vector.size();
+      sort(subject_vector.begin(), subject_vector.end(), timestampLess);
+
+      int range_max = (subject_vector_size < k) ? subject_vector_size : k;
+
+      for (int i = 0; i < range_max; i++) {
+        Node *subject_node = subject_vector[i];
+
+        cout << subject_node->key.first << " " << subject_node->color << " ";
+      }
+      cout << "\n";
+    } else {
+      cout << "Inquire Early Student error! You must solve this "
               "problem."
            << endl;
     }
@@ -426,7 +453,12 @@ int main() {
     }
 
     if (query_type == 'M') {
+      string subject;
+      int k;
 
+      cin >> subject >> k;
+
+      red_black_tree->inquireEarlyStudent(subject, k);
       continue;
     }
   }
