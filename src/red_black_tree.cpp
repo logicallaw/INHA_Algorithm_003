@@ -78,7 +78,7 @@ public:
     while (doubleRed(new_node)) {
       if (isBlack(sibling(new_node->parent_node))) {
         new_node = restructure(new_node);
-        return;
+        break;
       }
       // { sibling(new_node->parent_node) is red }
       else {
@@ -173,7 +173,7 @@ public:
       }
     } else {
       // LL
-      if (par_node->left_child == par_node) {
+      if (par_node->left_child == cur_node) {
         par_node->color = 'B';
         cur_node->color = 'R';
         grand_par_node->color = 'R';
