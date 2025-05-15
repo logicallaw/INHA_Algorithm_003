@@ -97,7 +97,7 @@ public:
       Node *cur_node = new_node;
       while (doubleRed(cur_node)) {
         if (isBlack(sibling(cur_node->parent_node))) {
-          cur_node = restructure(cur_node);
+          restructure(cur_node);
           break;
         }
         // { sibling(new_node->parent_node) is red }
@@ -182,7 +182,7 @@ public:
     return par_node->left_child;
   }
 
-  Node *restructure(Node *cur_node) {
+  void restructure(Node *cur_node) {
     Node *par_node = cur_node->parent_node;
     Node *grand_par_node = par_node->parent_node;
 
@@ -193,14 +193,14 @@ public:
         par_node->color = 'R';
         grand_par_node->color = 'R';
         rotateRight(par_node);
-        return rotateLeft(grand_par_node);
+        rotateLeft(grand_par_node);
       }
       // RR
       else {
         par_node->color = 'B';
         cur_node->color = 'R';
         grand_par_node->color = 'R';
-        return rotateLeft(grand_par_node);
+        rotateLeft(grand_par_node);
       }
     } else {
       // LL
@@ -208,7 +208,7 @@ public:
         par_node->color = 'B';
         cur_node->color = 'R';
         grand_par_node->color = 'R';
-        return rotateRight(grand_par_node);
+        rotateRight(grand_par_node);
       }
       // LR
       else {
@@ -216,12 +216,12 @@ public:
         par_node->color = 'R';
         grand_par_node->color = 'R';
         rotateLeft(par_node);
-        return rotateRight(grand_par_node);
+        rotateRight(grand_par_node);
       }
     }
   }
 
-  Node *rotateRight(Node *old_root) {
+  void rotateRight(Node *old_root) {
     Node *new_root = old_root->left_child;
     Node *middle_subtree = new_root->right_child;
 
@@ -246,10 +246,9 @@ public:
     if (new_root->parent_node == nullptr) {
       tree_root = new_root;
     }
-    return new_root;
   }
 
-  Node *rotateLeft(Node *old_root) {
+  void rotateLeft(Node *old_root) {
     Node *new_root = old_root->right_child;
     Node *middle_subtree = new_root->left_child;
 
@@ -274,7 +273,6 @@ public:
     if (new_root->parent_node == nullptr) {
       tree_root = new_root;
     }
-    return new_root;
   }
 
   int getNodeDepth(Node *cur_node) {

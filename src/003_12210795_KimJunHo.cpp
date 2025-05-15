@@ -1,0 +1,471 @@
+/*
+ * This is file of the project 2025_Lecture_Algorithm
+ * Licensed under the MIT License.
+ * Copyright (c) 2025 Junho Kim
+ * For full license text, see the LICENSE file in the root directory or at
+ * https://opensource.org/license/mit
+ * Author: Junho Kim
+ * Latest Updated Date: 2025-05-15
+ */
+#include <algorithm>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+using namespace std;
+
+// Define enum.
+
+class RBT;
+
+class Node {
+public:
+  Node(const int &sid, const string &subject, const string &sname,
+       const int &semester, const string &phone, const int &timestamp)
+      : key(pair<int, string>(sid, subject)), sname(sname), semester(semester),
+        phone(phone), timestamp(timestamp), parent_node(nullptr),
+        left_child(nullptr), right_child(nullptr), color('R') {}
+
+private:
+  pair<int, string> key;
+  string sname;
+  int semester;
+  string phone;
+  int timestamp;
+
+  Node *parent_node;
+  Node *left_child;
+  Node *right_child;
+
+  char color;
+
+  friend class RBT;
+};
+
+class RBT {
+public:
+  RBT() : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
+
+  void insert(const int &sid, const string &subject, const string &sname,
+              const int &semester, const string &phone, const int &timestamp) {
+    Node *new_node = new Node(sid, subject, sname, semester, phone, timestamp);
+
+    // If it has not any node
+    if (tree_size == 0) {
+      Node *new_node =
+          new Node(sid, subject, sname, semester, phone, timestamp);
+
+      addNewVectorInSidMap(sid, subject, new_node);
+      addStudentInfoInSubjectMap(subject, new_node);
+
+      new_node->color = 'B';
+      tree_root = new_node;
+      tree_size++;
+      cout << "0 0\n";
+      return;
+    }
+
+    // Search parent node or self node
+    pair<Node *, char> searched_result =
+        searchParentOrSelf(tree_root, new_node->key);
+    if (searched_result.first == nullptr) {
+      cout << "Insertion error! You must solve this problem." << endl;
+      return;
+    }
+
+    bool does_exist_new_node = false;
+    // If it's already existed, update timestamp
+    if (searched_result.first->key == new_node->key) {
+      searched_result.first->timestamp = timestamp;
+      does_exist_new_node = true;
+    } else {
+      // add parent-child relation
+      new_node->parent_node = searched_result.first;
+
+      if (searched_result.second == 'L') {
+        searched_result.first->left_child = new_node;
+      }
+      if (searched_result.second == 'R') {
+        searched_result.first->right_child = new_node;
+      }
+      tree_size++;
+
+      addNewVectorInSidMap(sid, subject, new_node);
+      addStudentInfoInSubjectMap(subject, new_node);
+
+      // Check ordering condition.
+      Node *cur_node = new_node;
+      while (doubleRed(cur_node)) {
+        if (isBlack(sibling(cur_node->parent_node))) {
+          restructure(cur_node);
+          break;
+        }
+        // { sibling(new_node->parent_node) is red }
+        else {
+          cur_node = recolor(cur_node);
+        }
+      }
+    }
+    if (does_exist_new_node) {
+      int node_depth = getNodeDepth(searched_result.first);
+      cout << node_depth << " " << does_exist_new_node << "\n";
+    } else {
+      int new_node_depth = getNodeDepth(new_node);
+      cout << new_node_depth << " " << does_exist_new_node << "\n";
+    }
+  }
+
+  // Find cur_node's parent node.
+  // Return value's categories: nullptr, parent node, existing node
+  pair<Node *, char> searchParentOrSelf(Node *cur_node,
+                                        const pair<int, string> &key) {
+    if (cur_node == nullptr) {
+      return pair<Node *, char>(nullptr, 'E');
+    }
+
+    if (comparator(cur_node->key, key) > 0) {
+      if (cur_node->left_child != nullptr) {
+        return searchParentOrSelf(cur_node->left_child, key);
+      }
+      return pair<Node *, char>(cur_node, 'L');
+    }
+    if (comparator(cur_node->key, key) < 0) {
+      if (cur_node->right_child != nullptr) {
+        return searchParentOrSelf(cur_node->right_child, key);
+      }
+      return pair<Node *, char>(cur_node, 'R');
+    }
+    // { If it's already exist, return self node. }
+    return pair<Node *, char>(cur_node, 'A');
+  }
+
+  int comparator(const pair<int, string> &comp1,
+                 const pair<int, string> &comp2) {
+    if (comp1.first < comp2.first) {
+      return -1;
+    }
+    if (comp1.first > comp2.first) {
+      return 1;
+    }
+    // { comp1.first == comp2.first }
+    if (comp1.second < comp2.second) {
+      return -1;
+    }
+    if (comp1.second > comp2.second) {
+      return 1;
+    }
+    return 0;
+  }
+
+  bool doubleRed(Node *cur_node) {
+    if (cur_node->color == 'B') {
+      return false;
+    }
+    if (cur_node->parent_node == nullptr) {
+      return false;
+    }
+    return (cur_node->parent_node->color == 'R');
+  }
+
+  bool isBlack(Node *sibling_node) {
+    if (sibling_node == nullptr || sibling_node->color == 'B') {
+      return true;
+    }
+    return false;
+  }
+
+  Node *sibling(Node *cur_node) {
+    Node *par_node = cur_node->parent_node;
+    if (par_node->left_child == cur_node) {
+      return par_node->right_child;
+    }
+    return par_node->left_child;
+  }
+
+  void restructure(Node *cur_node) {
+    Node *par_node = cur_node->parent_node;
+    Node *grand_par_node = par_node->parent_node;
+
+    if (grand_par_node->right_child == par_node) {
+      // RL
+      if (par_node->left_child == cur_node) {
+        cur_node->color = 'B';
+        par_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateRight(par_node);
+        rotateLeft(grand_par_node);
+      }
+      // RR
+      else {
+        par_node->color = 'B';
+        cur_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateLeft(grand_par_node);
+      }
+    } else {
+      // LL
+      if (par_node->left_child == cur_node) {
+        par_node->color = 'B';
+        cur_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateRight(grand_par_node);
+      }
+      // LR
+      else {
+        cur_node->color = 'B';
+        par_node->color = 'R';
+        grand_par_node->color = 'R';
+        rotateLeft(par_node);
+        rotateRight(grand_par_node);
+      }
+    }
+  }
+
+  void rotateRight(Node *old_root) {
+    Node *new_root = old_root->left_child;
+    Node *middle_subtree = new_root->right_child;
+
+    new_root->right_child = old_root;
+    old_root->left_child = middle_subtree;
+
+    if (middle_subtree) {
+      middle_subtree->parent_node = old_root;
+    }
+    new_root->parent_node = old_root->parent_node;
+    old_root->parent_node = new_root;
+
+    if (new_root->parent_node) {
+      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+        new_root->parent_node->right_child = new_root;
+      }
+      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+        new_root->parent_node->left_child = new_root;
+      }
+    }
+
+    if (new_root->parent_node == nullptr) {
+      tree_root = new_root;
+    }
+  }
+
+  void rotateLeft(Node *old_root) {
+    Node *new_root = old_root->right_child;
+    Node *middle_subtree = new_root->left_child;
+
+    new_root->left_child = old_root;
+    old_root->right_child = middle_subtree;
+
+    if (middle_subtree) {
+      middle_subtree->parent_node = old_root;
+    }
+    new_root->parent_node = old_root->parent_node;
+    old_root->parent_node = new_root;
+
+    if (new_root->parent_node) {
+      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+        new_root->parent_node->right_child = new_root;
+      }
+      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+        new_root->parent_node->left_child = new_root;
+      }
+    }
+
+    if (new_root->parent_node == nullptr) {
+      tree_root = new_root;
+    }
+  }
+
+  int getNodeDepth(Node *cur_node) {
+    int depth = 0;
+    while (cur_node->parent_node != nullptr) {
+      cur_node = cur_node->parent_node;
+      depth++;
+    }
+    return depth;
+  }
+
+  Node *recolor(Node *cur_node) {
+    Node *par_node = cur_node->parent_node;
+    Node *grand_par_node = par_node->parent_node;
+
+    exchangeColor(grand_par_node);
+    exchangeColor(par_node);
+    exchangeColor(sibling(par_node));
+
+    if (grand_par_node == tree_root && grand_par_node->color == 'R') {
+      grand_par_node->color = 'B';
+    }
+    return grand_par_node;
+  }
+
+  void exchangeColor(Node *node) {
+    char cur_color = node->color;
+    switch (cur_color) {
+    case 'R':
+      node->color = 'B';
+      break;
+    case 'B':
+      node->color = 'R';
+      break;
+    }
+  }
+
+  void inquireAllSubjects(const int &sid) {
+    // If existed
+    if (sid_map.find(sid) != sid_map.end()) {
+      vector<pair<string, Node *>> &sid_vector = sid_map[sid];
+
+      // sorted by subject name
+      sort(sid_vector.begin(), sid_vector.end(), subjectNameLess);
+
+      for (const pair<string, Node *> &ele : sid_vector) {
+        cout << ele.first << " " << ele.second->color << " ";
+      }
+      cout << "\n";
+
+      return;
+    }
+    cout << "No records found\n";
+  }
+
+  static bool subjectNameLess(const pair<string, Node *> &a,
+                              const pair<string, Node *> &b) {
+    return a.first < b.first;
+  }
+
+  static bool timestampLess(Node *&a, Node *&b) {
+    return a->timestamp < b->timestamp;
+  }
+
+  void addNewVectorInSidMap(const int &sid, const string &subject,
+                            Node *new_node) {
+    pair<string, Node *> new_node_pair(subject, new_node);
+
+    if (sid_map.find(sid) != sid_map.end()) {
+      sid_map[sid].push_back(new_node_pair);
+      return;
+    }
+    vector<pair<string, Node *>> new_node_vector;
+    new_node_vector.push_back(new_node_pair);
+    sid_map.insert({sid, new_node_vector});
+  }
+
+  void addStudentInfoInSubjectMap(const string &subject, Node *new_node) {
+    if (subject_map.find(subject) == subject_map.end()) {
+      vector<Node *> new_vector;
+
+      new_vector.push_back(new_node);
+
+      subject_map.insert({subject, new_vector});
+      return;
+    }
+    vector<Node *> &subject_vector = subject_map[subject];
+    if (find(subject_vector.begin(), subject_vector.end(), new_node) ==
+        subject_vector.end()) {
+      subject_map[subject].push_back(new_node);
+    }
+  }
+
+  void inquireStudentNumberOfSubject(const string &subject) {
+    if (subject_map.find(subject) != subject_map.end()) {
+      const vector<Node *> &subject_vector = subject_map[subject];
+
+      const int student_number_of_subject = subject_vector.size();
+
+      int depth_sum = 0;
+      for (Node *ele : subject_vector) {
+        depth_sum += getNodeDepth(ele);
+      }
+      cout << student_number_of_subject << " " << depth_sum << "\n";
+    } else {
+      cout << "Inquire student number of subject error! You must solve this "
+              "problem."
+           << endl;
+    }
+  }
+
+  void inquireEarlyStudent(const string &subject, const int &k) {
+    if (subject_map.find(subject) != subject_map.end()) {
+      vector<Node *> &subject_vector = subject_map[subject];
+
+      const int subject_vector_size = subject_vector.size();
+      sort(subject_vector.begin(), subject_vector.end(), timestampLess);
+
+      int range_max = (subject_vector_size < k) ? subject_vector_size : k;
+
+      for (int i = 0; i < range_max; i++) {
+        Node *subject_node = subject_vector[i];
+
+        cout << subject_node->key.first << " " << subject_node->color << " ";
+      }
+      cout << "\n";
+    } else {
+      cout << "Inquire Early Student error! You must solve this "
+              "problem."
+           << endl;
+    }
+  }
+
+private:
+  Node *tree_root;
+  int tree_size;
+  map<int, vector<pair<string, Node *>>> sid_map;
+  map<string, vector<Node *>> subject_map;
+};
+
+int main() {
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+
+  int test_case;
+  cin >> test_case;
+
+  RBT *red_black_tree = new RBT();
+
+  while (test_case--) {
+    char query_type;
+    cin >> query_type;
+
+    if (query_type == 'I') {
+      int sid, semester, timestamp;
+      string subject, sname, phone;
+
+      cin >> sid >> subject >> sname >> semester >> phone >> timestamp;
+
+      red_black_tree->insert(sid, subject, sname, semester, phone, timestamp);
+
+      continue;
+    }
+
+    if (query_type == 'L') {
+      int sid;
+
+      cin >> sid;
+
+      red_black_tree->inquireAllSubjects(sid);
+      continue;
+    }
+
+    if (query_type == 'C') {
+      string subject;
+
+      cin >> subject;
+
+      red_black_tree->inquireStudentNumberOfSubject(subject);
+      continue;
+    }
+
+    if (query_type == 'M') {
+      string subject;
+      int k;
+
+      cin >> subject >> k;
+
+      red_black_tree->inquireEarlyStudent(subject, k);
+      continue;
+    }
+  }
+
+  return 0;
+}
