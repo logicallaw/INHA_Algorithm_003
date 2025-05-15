@@ -50,22 +50,21 @@ public:
               const int &semester, const string &phone, const int &timestamp) {
     Node *new_node = new Node(sid, subject, sname, semester, phone, timestamp);
 
-    // If new_node is a root
+    // If it has not any node
     if (tree_size == 0) {
       Node *new_node =
           new Node(sid, subject, sname, semester, phone, timestamp);
-      vector<pair<string, Node *>> new_node_vector;
-      new_node_vector.push_back(pair<string, Node *>(subject, new_node));
+
+      addNewVectorInSidMap(sid, subject, new_node);
 
       new_node->color = 'B';
       tree_root = new_node;
-      sid_map.insert({sid, new_node_vector});
       tree_size++;
       cout << "0 0\n";
       return;
     }
 
-    // 삽입할 위치의 부모를 찾자.
+    // Search parent node or self node
     pair<Node *, char> searched_result =
         searchParentOrSelf(tree_root, new_node->key);
     if (searched_result.first == nullptr) {
@@ -74,11 +73,12 @@ public:
     }
 
     bool does_exist_new_node = false;
+    // If it's already existed, update timestamp
     if (searched_result.first->key == new_node->key) {
       searched_result.first->timestamp = timestamp;
       does_exist_new_node = true;
     } else {
-      // Update parent-child relation.
+      // add parent-child relation
       new_node->parent_node = searched_result.first;
 
       if (searched_result.second == 'L') {
@@ -88,6 +88,8 @@ public:
         searched_result.first->right_child = new_node;
       }
       tree_size++;
+
+      addNewVectorInSidMap(sid, subject, new_node);
 
       // Check ordering condition.
       Node *cur_node = new_node;
@@ -102,14 +104,7 @@ public:
         }
       }
     }
-    pair<string, Node *> new_node_pair(subject, new_node);
-    if (sid_map.find(sid) != sid_map.end()) {
-      sid_map[sid].push_back(new_node_pair);
-    } else {
-      vector<pair<string, Node *>> new_node_vector;
-      new_node_vector.push_back(new_node_pair);
-      sid_map.insert({sid, new_node_vector});
-    }
+
     int new_node_depth = getNodeDepth(new_node);
     cout << new_node_depth << " " << does_exist_new_node << "\n";
   }
@@ -332,6 +327,21 @@ public:
     return a.first < b.first;
   }
 
+  void addNewVectorInSidMap(const int &sid, const string &subject,
+                            Node *new_node) {
+    pair<string, Node *> new_node_pair(subject, new_node);
+
+    if (sid_map.find(sid) != sid_map.end()) {
+      sid_map[sid].push_back(new_node_pair);
+    } else {
+      vector<pair<string, Node *>> new_node_vector;
+      new_node_vector.push_back(new_node_pair);
+      sid_map.insert({sid, new_node_vector});
+    }
+  }
+
+  void inquireStudentNumberOfSubject(const string &subject) {}
+
 private:
   Node *tree_root;
   int tree_size;
@@ -373,7 +383,11 @@ int main() {
     }
 
     if (query_type == 'C') {
+      string subject;
 
+      cin >> subject;
+
+      red_black_tree->inquireStudentNumberOfSubject(subject);
       continue;
     }
 
