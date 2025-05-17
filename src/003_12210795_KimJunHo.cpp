@@ -90,12 +90,13 @@ private:
                              Node *new_node);
   void insertStudentToSubjectMap(const string &subject, Node *new_node);
 
-  void restructure(Node *cur_node);
-  Node *recolor(Node *cur_node);
+  void adjustRestructure(Node *cur_node);
+  Node *adjustRecolor(Node *cur_node);
+  void adjustRebalance(Node *cur_node);
+
   void rotateRight(Node *old_root);
   void rotateLeft(Node *old_root);
-  void exchangeColor(Node *node);
-  void rebalance(Node *cur_node);
+  void filpColor(Node *node);
 
   Node *getSibling(Node *cur_node);
   int getNodeDepth(Node *cur_node);
@@ -299,7 +300,7 @@ void RedBlackTree::handleNewInsert(const int &sid, const string &subject,
   insertToMaps(sid, subject, child);
 
   Node *cur_node = child;
-  rebalance(cur_node);
+  adjustRebalance(cur_node);
   printStatusAfterInsert(child, false);
 }
 
@@ -345,7 +346,7 @@ void RedBlackTree::insertStudentToSubjectMap(const string &subject,
   }
 }
 
-void RedBlackTree::restructure(Node *cur_node) {
+void RedBlackTree::adjustRestructure(Node *cur_node) {
   Node *par_node = cur_node->parent_node;
   Node *grand_par_node = par_node->parent_node;
 
@@ -384,18 +385,29 @@ void RedBlackTree::restructure(Node *cur_node) {
   }
 }
 
-Node *RedBlackTree::recolor(Node *cur_node) {
+Node *RedBlackTree::adjustRecolor(Node *cur_node) {
   Node *par_node = cur_node->parent_node;
   Node *grand_par_node = par_node->parent_node;
 
-  exchangeColor(grand_par_node);
-  exchangeColor(par_node);
-  exchangeColor(getSibling(par_node));
+  filpColor(grand_par_node);
+  filpColor(par_node);
+  filpColor(getSibling(par_node));
 
   if (grand_par_node == tree_root && grand_par_node->color == 'R') {
     grand_par_node->color = 'B';
   }
   return grand_par_node;
+}
+
+void RedBlackTree::adjustRebalance(Node *cur_node) {
+  while (isDoubleRed(cur_node)) {
+    if (isBlack(getSibling(cur_node->parent_node))) {
+      adjustRestructure(cur_node);
+      break;
+    } else {
+      cur_node = adjustRecolor(cur_node);
+    }
+  }
 }
 
 void RedBlackTree::rotateRight(Node *old_root) {
@@ -452,7 +464,7 @@ void RedBlackTree::rotateLeft(Node *old_root) {
   }
 }
 
-void RedBlackTree::exchangeColor(Node *node) {
+void RedBlackTree::filpColor(Node *node) {
   char cur_color = node->color;
   switch (cur_color) {
   case 'R':
@@ -461,17 +473,6 @@ void RedBlackTree::exchangeColor(Node *node) {
   case 'B':
     node->color = 'R';
     break;
-  }
-}
-
-void RedBlackTree::rebalance(Node *cur_node) {
-  while (isDoubleRed(cur_node)) {
-    if (isBlack(getSibling(cur_node->parent_node))) {
-      restructure(cur_node);
-      break;
-    } else {
-      cur_node = recolor(cur_node);
-    }
   }
 }
 
