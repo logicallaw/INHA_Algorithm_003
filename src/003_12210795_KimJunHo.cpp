@@ -72,6 +72,11 @@ class RedBlackTree {
 public:
   // Constructor: Initializes an empty Red-Black Tree.
   RedBlackTree();
+  ~RedBlackTree();
+
+  // Recursively deletes all nodes in the subtree rooted at 'node' using
+  // post-order traversal.
+  void deleteSubtree(Node *node);
 
   // Query Type: “I sid subject sname semester phone timestamp”
   void inquireInsert(const int &sid, const string &subject, const string &sname,
@@ -200,6 +205,19 @@ Node::Node(const int &sid, const string &subject, const string &sname,
 
 RedBlackTree::RedBlackTree()
     : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
+
+RedBlackTree::~RedBlackTree() { deleteSubtree(tree_root); }
+
+// Recursively deletes all nodes in the subtree rooted at 'node' using
+// post-order traversal.
+void RedBlackTree::deleteSubtree(Node *node) {
+  if (!node)
+    return;
+
+  deleteSubtree(node->left_child);
+  deleteSubtree(node->right_child);
+  delete node;
+}
 
 constexpr bool RedBlackTree::kIsDuplicateNode;
 constexpr bool RedBlackTree::kIsNewlyInserted;
@@ -725,6 +743,8 @@ int main() {
       continue;
     }
   }
+
+  delete red_black_tree;
 
   return 0;
 }
