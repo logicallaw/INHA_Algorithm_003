@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the root directory or at
  * https://opensource.org/license/mit
  * Author: Junho Kim
- * Latest Updated Date: 2025-05-16
+ * Latest Updated Date: 2025-05-17
  */
 #include <algorithm>
 #include <iostream>
@@ -18,6 +18,11 @@ class Node;
 class RedBlackTree;
 
 typedef pair<Node *, char> SearchResult;
+typedef pair<int, string> NodeKey;
+typedef pair<string, Node *> SubjectNodePair;
+typedef map<int, vector<SubjectNodePair>> SidMap;
+typedef map<string, vector<Node *>> SubjectMap;
+
 enum class QueryType : char {
   kInsert = 'I',
   kListSubjects = 'L',
@@ -31,7 +36,7 @@ public:
        const int &semester, const string &phone, const int &timestamp);
 
 private:
-  pair<int, string> key;
+  NodeKey key;
   string sname;
   int semester;
   string phone;
@@ -58,8 +63,8 @@ public:
   void inquireEarlyStudent(const string &subject, const int &k);
 
 private:
-  static bool subjectNameLess(const pair<string, Node *> &a,
-                              const pair<string, Node *> &b);
+  static bool subjectNameLess(const SubjectNodePair &a,
+                              const SubjectNodePair &b);
   static bool timestampLess(Node *&a, Node *&b);
   static constexpr bool kIsDuplicateNode = true;
   static constexpr bool kIsNewlyInserted = false;
@@ -71,16 +76,15 @@ private:
   static constexpr int kCompareGreater = 1;
 
   bool isEmpty() const;
-  bool isDuplicateKey(const pair<int, string> &a, const pair<int, string> &b);
+  bool isDuplicateKey(const NodeKey &a, const NodeKey &b);
   bool isBlack(Node *sibling_node);
   bool isDoubleRed(Node *cur_node);
 
   Node *getSibling(Node *cur_node);
   int getNodeDepth(Node *cur_node);
 
-  SearchResult searchParentOrSelf(Node *cur_node, const pair<int, string> &key);
-  int comparator(const pair<int, string> &comp1,
-                 const pair<int, string> &comp2);
+  SearchResult searchParentOrSelf(Node *cur_node, const NodeKey &key);
+  int comparator(const NodeKey &comp1, const NodeKey &comp2);
   void printNodeStatus(Node *node, const bool &status);
 
   void handleEmptyInsert(const int &sid, const string &subject, Node *new_node);
@@ -103,13 +107,13 @@ private:
 
   Node *tree_root;
   int tree_size;
-  map<int, vector<pair<string, Node *>>> sid_map;
-  map<string, vector<Node *>> subject_map;
+  SidMap sid_map;
+  SubjectMap subject_map;
 };
 
 Node::Node(const int &sid, const string &subject, const string &sname,
            const int &semester, const string &phone, const int &timestamp)
-    : key(pair<int, string>(sid, subject)), sname(sname), semester(semester),
+    : key(NodeKey(sid, subject)), sname(sname), semester(semester),
       phone(phone), timestamp(timestamp), parent_node(nullptr),
       left_child(nullptr), right_child(nullptr), color('R') {}
 
@@ -155,12 +159,12 @@ void RedBlackTree::inquireInsert(const int &sid, const string &subject,
 void RedBlackTree::inquireAllSubjects(const int &sid) {
   // If existed
   if (sid_map.find(sid) != sid_map.end()) {
-    vector<pair<string, Node *>> &sid_vector = sid_map[sid];
+    vector<SubjectNodePair> &sid_vector = sid_map[sid];
 
     // sorted by subject name
     sort(sid_vector.begin(), sid_vector.end(), subjectNameLess);
 
-    for (const pair<string, Node *> &ele : sid_vector) {
+    for (const SubjectNodePair &ele : sid_vector) {
       cout << ele.first << " " << ele.second->color << " ";
     }
     cout << "\n";
@@ -206,8 +210,8 @@ void RedBlackTree::inquireEarlyStudent(const string &subject, const int &k) {
   cout << kUnexpectedErrorMessage << "\n";
 }
 
-bool RedBlackTree::subjectNameLess(const pair<string, Node *> &a,
-                                   const pair<string, Node *> &b) {
+bool RedBlackTree::subjectNameLess(const SubjectNodePair &a,
+                                   const SubjectNodePair &b) {
   return a.first < b.first;
 }
 
@@ -217,8 +221,7 @@ bool RedBlackTree::timestampLess(Node *&a, Node *&b) {
 
 bool RedBlackTree::isEmpty() const { return (tree_size == 0); }
 
-bool RedBlackTree::isDuplicateKey(const pair<int, string> &a,
-                                  const pair<int, string> &b) {
+bool RedBlackTree::isDuplicateKey(const NodeKey &a, const NodeKey &b) {
   return a == b;
 }
 
@@ -257,7 +260,7 @@ int RedBlackTree::getNodeDepth(Node *cur_node) {
 }
 
 SearchResult RedBlackTree::searchParentOrSelf(Node *cur_node,
-                                              const pair<int, string> &key) {
+                                              const NodeKey &key) {
   if (cur_node == nullptr) {
     return SearchResult(nullptr, 'E');
   }
@@ -278,8 +281,7 @@ SearchResult RedBlackTree::searchParentOrSelf(Node *cur_node,
   return SearchResult(cur_node, 'A');
 }
 
-int RedBlackTree::comparator(const pair<int, string> &comp1,
-                             const pair<int, string> &comp2) {
+int RedBlackTree::comparator(const NodeKey &comp1, const NodeKey &comp2) {
   if (comp1.first < comp2.first) {
     return kCompareLess;
   }
@@ -340,13 +342,13 @@ void RedBlackTree::insertToMaps(const int &sid, const string &subject,
 
 void RedBlackTree::insertStudentToSidMap(const int &sid, const string &subject,
                                          Node *new_node) {
-  pair<string, Node *> new_node_pair(subject, new_node);
+  SubjectNodePair new_node_pair(subject, new_node);
 
   if (sid_map.find(sid) != sid_map.end()) {
     sid_map[sid].push_back(new_node_pair);
     return;
   }
-  vector<pair<string, Node *>> new_node_vector;
+  vector<SubjectNodePair> new_node_vector;
   new_node_vector.push_back(new_node_pair);
   sid_map.insert({sid, new_node_vector});
 }
