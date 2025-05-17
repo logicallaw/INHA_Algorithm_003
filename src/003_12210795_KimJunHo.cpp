@@ -88,11 +88,12 @@ public:
   void inquireEarlyStudent(const string &subject, const int &k);
 
 private:
-  // Print out small subject names first in dictionary order.
+  // Comparator: returns true if the subject name of 'a' is lexicographically
+  // less than 'b'.
   static bool subjectNameLess(const SubjectNodePair &a,
                               const SubjectNodePair &b);
 
-  // Print out small timestamp first in fast order.
+  // Comparator: returns true if 'a' has an earlier timestamp than 'b'.
   static bool timestampLess(Node *&a, Node *&b);
 
   // Constant: Indicates that the node already exists in the tree.
@@ -176,7 +177,7 @@ private:
   void rotateLeft(Node *old_root);
 
   // Flips the color of a node ('R' ↔ 'B').
-  void filpColor(Node *node);
+  void flipColor(Node *node);
 
   // Root node of the Red-Black Tree.
   Node *tree_root;
@@ -245,7 +246,7 @@ void RedBlackTree::inquireInsert(const int &sid, const string &subject,
 
 // Query Type: “L sid”
 void RedBlackTree::inquireAllSubjects(const int &sid) {
-  // Look up the entire application subject of a particular student.
+  // Retrieve all subjects a student has applied for.
   if (sid_map.find(sid) != sid_map.end()) {
     // Save the entire application for a particular student.
     vector<SubjectNodePair> &sid_vector = sid_map[sid];
@@ -261,6 +262,7 @@ void RedBlackTree::inquireAllSubjects(const int &sid) {
 
     return;
   }
+
   cout << kNoRecordsFoundMessage << "\n";
 }
 
@@ -268,7 +270,7 @@ void RedBlackTree::inquireAllSubjects(const int &sid) {
 void RedBlackTree::inquireStudentNumberOfSubject(const string &subject) {
   // Look up the number of students who applied for a particular subject.
   if (subject_map.find(subject) != subject_map.end()) {
-    // Save the number of students who applied for a particular subject.
+    // Save the number of students who applied for the given subject.
     const vector<Node *> &subject_vector = subject_map[subject];
 
     // Save the size of the number of students who applied for a particular
@@ -288,22 +290,21 @@ void RedBlackTree::inquireStudentNumberOfSubject(const string &subject) {
     return;
   }
 
-  // If the message below is printed, the algorithm is wrong.
+  // This should not happen if the algorithm and input are correct.
   cout << kUnexpectedErrorMessage << "\n";
 }
 
 // Query Type: ”M subject K”
 void RedBlackTree::inquireEarlyStudent(const string &subject, const int &k) {
-  // Look up the student number of K who applied for a particular subject first.
+  // Retrieve up to K students who applied earliest for the subject.
   if (subject_map.find(subject) != subject_map.end()) {
     // Save the K number of students who applied for a particular subject first.
     vector<Node *> &subject_vector = subject_map[subject];
 
-    // Sort the background in the order in which timestamp is the fastest.
+    // Sort the student nodes by earliest timestamp (ascending).
     sort(subject_vector.begin(), subject_vector.end(), timestampLess);
 
-    // Compare the number of students who applied for a particular subject with
-    // K.
+    // Determine how many students to print (up to K).
     const int subject_vector_size = subject_vector.size();
     int range_max = (subject_vector_size < k) ? subject_vector_size : k;
 
@@ -318,17 +319,18 @@ void RedBlackTree::inquireEarlyStudent(const string &subject, const int &k) {
     return;
   }
 
-  // If the message below is printed, the algorithm is wrong.
+  // This should not happen if the algorithm and input are correct.
   cout << kUnexpectedErrorMessage << "\n";
 }
 
-// Print out small subject names first in dictionary order.
+// Comparator: returns true if the subject name of 'a' is lexicographically less
+// than 'b'.
 bool RedBlackTree::subjectNameLess(const SubjectNodePair &a,
                                    const SubjectNodePair &b) {
   return a.first < b.first;
 }
 
-// Print out small timestamp first in fast order.
+// Comparator: returns true if 'a' has an earlier timestamp than 'b'.
 bool RedBlackTree::timestampLess(Node *&a, Node *&b) {
   return a->timestamp < b->timestamp;
 }
@@ -558,9 +560,9 @@ Node *RedBlackTree::adjustRecolor(Node *cur_node) {
   Node *par_node = cur_node->parent_node;
   Node *grand_par_node = par_node->parent_node;
 
-  filpColor(grand_par_node);
-  filpColor(par_node);
-  filpColor(getSibling(par_node));
+  flipColor(grand_par_node);
+  flipColor(par_node);
+  flipColor(getSibling(par_node));
 
   if (grand_par_node == tree_root && grand_par_node->color == 'R') {
     grand_par_node->color = 'B';
@@ -653,7 +655,7 @@ void RedBlackTree::rotateLeft(Node *old_root) {
 }
 
 // Flips the color of a node ('R' ↔ 'B').
-void RedBlackTree::filpColor(Node *node) {
+void RedBlackTree::flipColor(Node *node) {
   char cur_color = node->color;
   switch (cur_color) {
   case 'R':
@@ -670,7 +672,7 @@ int main() {
   std::cin.tie(nullptr);
   std::cout.tie(nullptr);
 
-  // Enter test casees.
+  // Enter test cases.
   int test_case;
   cin >> test_case;
 

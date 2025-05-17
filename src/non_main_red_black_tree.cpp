@@ -247,16 +247,16 @@ public:
     Node *par_node = cur_node->parent_node;
     Node *grand_par_node = par_node->parent_node;
 
-    filpColor(cur_node);
-    filpColor(par_node);
-    filpColor(grand_par_node);
+    flipColor(cur_node);
+    flipColor(par_node);
+    flipColor(grand_par_node);
 
     if (grand_par_node == tree_root && grand_par_node->color == 'R') {
       grand_par_node->color = 'B';
     }
   }
 
-  void filpColor(Node *node) {
+  void flipColor(Node *node) {
     char cur_color = node->color;
     switch (cur_color) {
     case 'R':
