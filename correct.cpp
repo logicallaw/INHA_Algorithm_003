@@ -14,7 +14,10 @@
 #include <vector>
 using namespace std;
 
-// Define enum.
+class Node;
+class RedBlackTree;
+
+typedef pair<Node *, char> SearchResult;
 enum class QueryType : char {
   kInsert = 'I',
   kListSubjects = 'L',
@@ -22,15 +25,10 @@ enum class QueryType : char {
   kEarliestApplicants = 'M'
 };
 
-class RedBlackTree;
-
 class Node {
 public:
   Node(const int &sid, const string &subject, const string &sname,
-       const int &semester, const string &phone, const int &timestamp)
-      : key(pair<int, string>(sid, subject)), sname(sname), semester(semester),
-        phone(phone), timestamp(timestamp), parent_node(nullptr),
-        left_child(nullptr), right_child(nullptr), color('R') {}
+       const int &semester, const string &phone, const int &timestamp);
 
 private:
   pair<int, string> key;
@@ -50,375 +48,449 @@ private:
 
 class RedBlackTree {
 public:
-  RedBlackTree()
-      : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
+  RedBlackTree();
 
-  void insert(const int &sid, const string &subject, const string &sname,
-              const int &semester, const string &phone, const int &timestamp) {
-    Node *new_node = new Node(sid, subject, sname, semester, phone, timestamp);
+  void inquireInsert(const int &sid, const string &subject, const string &sname,
+                     const int &semester, const string &phone,
+                     const int &timestamp);
 
-    // If it has not any node
-    if (tree_size == 0) {
-      Node *new_node =
-          new Node(sid, subject, sname, semester, phone, timestamp);
+  void inquireAllSubjects(const int &sid);
 
-      addNewVectorInSidMap(sid, subject, new_node);
-      addStudentInfoInSubjectMap(subject, new_node);
+  void inquireStudentNumberOfSubject(const string &subject);
 
-      new_node->color = 'B';
-      tree_root = new_node;
-      tree_size++;
-      cout << "0 0\n";
-      return;
-    }
-
-    // Search parent node or self node
-    pair<Node *, char> searched_result =
-        searchParentOrSelf(tree_root, new_node->key);
-    if (searched_result.first == nullptr) {
-      cout << "Insertion error! You must solve this problem." << endl;
-      return;
-    }
-
-    bool does_exist_new_node = false;
-    // If it's already existed, update timestamp
-    if (searched_result.first->key == new_node->key) {
-      searched_result.first->timestamp = timestamp;
-      does_exist_new_node = true;
-    } else {
-      // add parent-child relation
-      new_node->parent_node = searched_result.first;
-
-      if (searched_result.second == 'L') {
-        searched_result.first->left_child = new_node;
-      }
-      if (searched_result.second == 'R') {
-        searched_result.first->right_child = new_node;
-      }
-      tree_size++;
-
-      addNewVectorInSidMap(sid, subject, new_node);
-      addStudentInfoInSubjectMap(subject, new_node);
-
-      // Check ordering condition.
-      Node *cur_node = new_node;
-      while (doubleRed(cur_node)) {
-        if (isBlack(sibling(cur_node->parent_node))) {
-          restructure(cur_node);
-          break;
-        }
-        // { sibling(new_node->parent_node) is red }
-        else {
-          cur_node = recolor(cur_node);
-        }
-      }
-    }
-    if (does_exist_new_node) {
-      int node_depth = getNodeDepth(searched_result.first);
-      cout << node_depth << " " << does_exist_new_node << "\n";
-    } else {
-      int new_node_depth = getNodeDepth(new_node);
-      cout << new_node_depth << " " << does_exist_new_node << "\n";
-    }
-  }
-
-  // Find cur_node's parent node.
-  // Return value's categories: nullptr, parent node, existing node
-  pair<Node *, char> searchParentOrSelf(Node *cur_node,
-                                        const pair<int, string> &key) {
-    if (cur_node == nullptr) {
-      return pair<Node *, char>(nullptr, 'E');
-    }
-
-    if (comparator(cur_node->key, key) > 0) {
-      if (cur_node->left_child != nullptr) {
-        return searchParentOrSelf(cur_node->left_child, key);
-      }
-      return pair<Node *, char>(cur_node, 'L');
-    }
-    if (comparator(cur_node->key, key) < 0) {
-      if (cur_node->right_child != nullptr) {
-        return searchParentOrSelf(cur_node->right_child, key);
-      }
-      return pair<Node *, char>(cur_node, 'R');
-    }
-    // { If it's already exist, return self node. }
-    return pair<Node *, char>(cur_node, 'A');
-  }
-
-  int comparator(const pair<int, string> &comp1,
-                 const pair<int, string> &comp2) {
-    if (comp1.first < comp2.first) {
-      return -1;
-    }
-    if (comp1.first > comp2.first) {
-      return 1;
-    }
-    // { comp1.first == comp2.first }
-    if (comp1.second < comp2.second) {
-      return -1;
-    }
-    if (comp1.second > comp2.second) {
-      return 1;
-    }
-    return 0;
-  }
-
-  bool doubleRed(Node *cur_node) {
-    if (cur_node->color == 'B') {
-      return false;
-    }
-    if (cur_node->parent_node == nullptr) {
-      return false;
-    }
-    return (cur_node->parent_node->color == 'R');
-  }
-
-  bool isBlack(Node *sibling_node) {
-    if (sibling_node == nullptr || sibling_node->color == 'B') {
-      return true;
-    }
-    return false;
-  }
-
-  Node *sibling(Node *cur_node) {
-    Node *par_node = cur_node->parent_node;
-    if (par_node->left_child == cur_node) {
-      return par_node->right_child;
-    }
-    return par_node->left_child;
-  }
-
-  void restructure(Node *cur_node) {
-    Node *par_node = cur_node->parent_node;
-    Node *grand_par_node = par_node->parent_node;
-
-    if (grand_par_node->right_child == par_node) {
-      // RL
-      if (par_node->left_child == cur_node) {
-        cur_node->color = 'B';
-        par_node->color = 'R';
-        grand_par_node->color = 'R';
-        rotateRight(par_node);
-        rotateLeft(grand_par_node);
-      }
-      // RR
-      else {
-        par_node->color = 'B';
-        cur_node->color = 'R';
-        grand_par_node->color = 'R';
-        rotateLeft(grand_par_node);
-      }
-    } else {
-      // LL
-      if (par_node->left_child == cur_node) {
-        par_node->color = 'B';
-        cur_node->color = 'R';
-        grand_par_node->color = 'R';
-        rotateRight(grand_par_node);
-      }
-      // LR
-      else {
-        cur_node->color = 'B';
-        par_node->color = 'R';
-        grand_par_node->color = 'R';
-        rotateLeft(par_node);
-        rotateRight(grand_par_node);
-      }
-    }
-  }
-
-  void rotateRight(Node *old_root) {
-    Node *new_root = old_root->left_child;
-    Node *middle_subtree = new_root->right_child;
-
-    new_root->right_child = old_root;
-    old_root->left_child = middle_subtree;
-
-    if (middle_subtree) {
-      middle_subtree->parent_node = old_root;
-    }
-    new_root->parent_node = old_root->parent_node;
-    old_root->parent_node = new_root;
-
-    if (new_root->parent_node) {
-      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
-        new_root->parent_node->right_child = new_root;
-      }
-      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
-        new_root->parent_node->left_child = new_root;
-      }
-    }
-
-    if (new_root->parent_node == nullptr) {
-      tree_root = new_root;
-    }
-  }
-
-  void rotateLeft(Node *old_root) {
-    Node *new_root = old_root->right_child;
-    Node *middle_subtree = new_root->left_child;
-
-    new_root->left_child = old_root;
-    old_root->right_child = middle_subtree;
-
-    if (middle_subtree) {
-      middle_subtree->parent_node = old_root;
-    }
-    new_root->parent_node = old_root->parent_node;
-    old_root->parent_node = new_root;
-
-    if (new_root->parent_node) {
-      if (comparator(new_root->parent_node->key, new_root->key) < 0) {
-        new_root->parent_node->right_child = new_root;
-      }
-      if (comparator(new_root->parent_node->key, new_root->key) > 0) {
-        new_root->parent_node->left_child = new_root;
-      }
-    }
-
-    if (new_root->parent_node == nullptr) {
-      tree_root = new_root;
-    }
-  }
-
-  int getNodeDepth(Node *cur_node) {
-    int depth = 0;
-    while (cur_node->parent_node != nullptr) {
-      cur_node = cur_node->parent_node;
-      depth++;
-    }
-    return depth;
-  }
-
-  Node *recolor(Node *cur_node) {
-    Node *par_node = cur_node->parent_node;
-    Node *grand_par_node = par_node->parent_node;
-
-    exchangeColor(grand_par_node);
-    exchangeColor(par_node);
-    exchangeColor(sibling(par_node));
-
-    if (grand_par_node == tree_root && grand_par_node->color == 'R') {
-      grand_par_node->color = 'B';
-    }
-    return grand_par_node;
-  }
-
-  void exchangeColor(Node *node) {
-    char cur_color = node->color;
-    switch (cur_color) {
-    case 'R':
-      node->color = 'B';
-      break;
-    case 'B':
-      node->color = 'R';
-      break;
-    }
-  }
-
-  void inquireAllSubjects(const int &sid) {
-    // If existed
-    if (sid_map.find(sid) != sid_map.end()) {
-      vector<pair<string, Node *>> &sid_vector = sid_map[sid];
-
-      // sorted by subject name
-      sort(sid_vector.begin(), sid_vector.end(), subjectNameLess);
-
-      for (const pair<string, Node *> &ele : sid_vector) {
-        cout << ele.first << " " << ele.second->color << " ";
-      }
-      cout << "\n";
-
-      return;
-    }
-    cout << "No records found\n";
-  }
-
-  static bool subjectNameLess(const pair<string, Node *> &a,
-                              const pair<string, Node *> &b) {
-    return a.first < b.first;
-  }
-
-  static bool timestampLess(Node *&a, Node *&b) {
-    return a->timestamp < b->timestamp;
-  }
-
-  void addNewVectorInSidMap(const int &sid, const string &subject,
-                            Node *new_node) {
-    pair<string, Node *> new_node_pair(subject, new_node);
-
-    if (sid_map.find(sid) != sid_map.end()) {
-      sid_map[sid].push_back(new_node_pair);
-      return;
-    }
-    vector<pair<string, Node *>> new_node_vector;
-    new_node_vector.push_back(new_node_pair);
-    sid_map.insert({sid, new_node_vector});
-  }
-
-  void addStudentInfoInSubjectMap(const string &subject, Node *new_node) {
-    if (subject_map.find(subject) == subject_map.end()) {
-      vector<Node *> new_vector;
-
-      new_vector.push_back(new_node);
-
-      subject_map.insert({subject, new_vector});
-      return;
-    }
-    vector<Node *> &subject_vector = subject_map[subject];
-    if (find(subject_vector.begin(), subject_vector.end(), new_node) ==
-        subject_vector.end()) {
-      subject_map[subject].push_back(new_node);
-    }
-  }
-
-  void inquireStudentNumberOfSubject(const string &subject) {
-    if (subject_map.find(subject) != subject_map.end()) {
-      const vector<Node *> &subject_vector = subject_map[subject];
-
-      const int student_number_of_subject = subject_vector.size();
-
-      int depth_sum = 0;
-      for (Node *ele : subject_vector) {
-        depth_sum += getNodeDepth(ele);
-      }
-      cout << student_number_of_subject << " " << depth_sum << "\n";
-    } else {
-      cout << "Inquire student number of subject error! You must solve this "
-              "problem."
-           << endl;
-    }
-  }
-
-  void inquireEarlyStudent(const string &subject, const int &k) {
-    if (subject_map.find(subject) != subject_map.end()) {
-      vector<Node *> &subject_vector = subject_map[subject];
-
-      const int subject_vector_size = subject_vector.size();
-      sort(subject_vector.begin(), subject_vector.end(), timestampLess);
-
-      int range_max = (subject_vector_size < k) ? subject_vector_size : k;
-
-      for (int i = 0; i < range_max; i++) {
-        Node *subject_node = subject_vector[i];
-
-        cout << subject_node->key.first << " " << subject_node->color << " ";
-      }
-      cout << "\n";
-    } else {
-      cout << "Inquire Early Student error! You must solve this "
-              "problem."
-           << endl;
-    }
-  }
+  void inquireEarlyStudent(const string &subject, const int &k);
 
 private:
+  static bool subjectNameLess(const pair<string, Node *> &a,
+                              const pair<string, Node *> &b);
+  static bool timestampLess(Node *&a, Node *&b);
+  static constexpr int kRootDepth = 0;
+  static constexpr bool kIsExistingNode = false;
+  static constexpr int kNotExistedNode = 1;
+  static constexpr const char *kUnexpectedErrorMessage =
+      "Algorithm error! You must solve this problem.";
+
+  bool isEmpty() const;
+  bool isDuplicateKey(const pair<int, string> &a, const pair<int, string> &b);
+  bool isBlack(Node *sibling_node);
+  bool isDoubleRed(Node *cur_node);
+
+  SearchResult searchParentOrSelf(Node *cur_node, const pair<int, string> &key);
+  int comparator(const pair<int, string> &comp1,
+                 const pair<int, string> &comp2);
+  void printStatusAfterInsert(Node *inserted_node, const bool &node_status);
+
+  void handleEmptyInsert(const int &sid, const string &subject, Node *new_node);
+  void handleNewInsert(const int &sid, const string &subject, Node *parent,
+                       char direction, Node *child);
+  void handleDuplicateNode(Node *existing_node, const int &new_timestamp);
+
+  void insertToMaps(const int &sid, const string &subject, Node *new_node);
+  void insertStudentToSidMap(const int &sid, const string &subject,
+                             Node *new_node);
+  void insertStudentToSubjectMap(const string &subject, Node *new_node);
+
+  void restructure(Node *cur_node);
+  Node *recolor(Node *cur_node);
+  void rotateRight(Node *old_root);
+  void rotateLeft(Node *old_root);
+  void exchangeColor(Node *node);
+  void rebalance(Node *cur_node);
+
+  Node *getSibling(Node *cur_node);
+  int getNodeDepth(Node *cur_node);
+
   Node *tree_root;
   int tree_size;
   map<int, vector<pair<string, Node *>>> sid_map;
   map<string, vector<Node *>> subject_map;
 };
+
+Node::Node(const int &sid, const string &subject, const string &sname,
+           const int &semester, const string &phone, const int &timestamp)
+    : key(pair<int, string>(sid, subject)), sname(sname), semester(semester),
+      phone(phone), timestamp(timestamp), parent_node(nullptr),
+      left_child(nullptr), right_child(nullptr), color('R') {}
+
+RedBlackTree::RedBlackTree()
+    : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
+
+void RedBlackTree::inquireInsert(const int &sid, const string &subject,
+                                 const string &sname, const int &semester,
+                                 const string &phone, const int &timestamp) {
+
+  Node *new_node = new Node(sid, subject, sname, semester, phone, timestamp);
+
+  if (isEmpty()) {
+    handleEmptyInsert(sid, subject, new_node);
+    return;
+  }
+
+  SearchResult searched_result = searchParentOrSelf(tree_root, new_node->key);
+  Node *parent_or_self = searched_result.first;
+  char parent_direction = searched_result.second;
+
+  if (parent_or_self == nullptr) {
+    cout << kUnexpectedErrorMessage << "\n";
+    return;
+  }
+
+  bool does_exist_new_node = false;
+
+  if (isDuplicateKey(parent_or_self->key, new_node->key)) {
+    handleDuplicateNode(parent_or_self, timestamp);
+    return;
+  }
+
+  handleNewInsert(sid, subject, parent_or_self, parent_direction, new_node);
+}
+
+void RedBlackTree::inquireAllSubjects(const int &sid) {
+  // If existed
+  if (sid_map.find(sid) != sid_map.end()) {
+    vector<pair<string, Node *>> &sid_vector = sid_map[sid];
+
+    // sorted by subject name
+    sort(sid_vector.begin(), sid_vector.end(), subjectNameLess);
+
+    for (const pair<string, Node *> &ele : sid_vector) {
+      cout << ele.first << " " << ele.second->color << " ";
+    }
+    cout << "\n";
+
+    return;
+  }
+  cout << "No records found\n";
+}
+
+void RedBlackTree::inquireStudentNumberOfSubject(const string &subject) {
+  if (subject_map.find(subject) != subject_map.end()) {
+    const vector<Node *> &subject_vector = subject_map[subject];
+
+    const int student_number_of_subject = subject_vector.size();
+
+    int depth_sum = 0;
+    for (Node *ele : subject_vector) {
+      depth_sum += getNodeDepth(ele);
+    }
+    cout << student_number_of_subject << " " << depth_sum << "\n";
+    return;
+  }
+  cout << kUnexpectedErrorMessage << "\n";
+}
+
+void RedBlackTree::inquireEarlyStudent(const string &subject, const int &k) {
+  if (subject_map.find(subject) != subject_map.end()) {
+    vector<Node *> &subject_vector = subject_map[subject];
+
+    const int subject_vector_size = subject_vector.size();
+    sort(subject_vector.begin(), subject_vector.end(), timestampLess);
+
+    int range_max = (subject_vector_size < k) ? subject_vector_size : k;
+
+    for (int i = 0; i < range_max; i++) {
+      Node *subject_node = subject_vector[i];
+
+      cout << subject_node->key.first << " " << subject_node->color << " ";
+    }
+    cout << "\n";
+    return;
+  }
+  cout << kUnexpectedErrorMessage << "\n";
+}
+
+bool RedBlackTree::subjectNameLess(const pair<string, Node *> &a,
+                                   const pair<string, Node *> &b) {
+  return a.first < b.first;
+}
+
+bool RedBlackTree::timestampLess(Node *&a, Node *&b) {
+  return a->timestamp < b->timestamp;
+}
+
+bool RedBlackTree::isEmpty() const { return (tree_size == 0); }
+
+bool RedBlackTree::isDuplicateKey(const pair<int, string> &a,
+                                  const pair<int, string> &b) {
+  return a == b;
+}
+
+bool RedBlackTree::isBlack(Node *sibling_node) {
+  if (sibling_node == nullptr || sibling_node->color == 'B') {
+    return true;
+  }
+  return false;
+}
+
+bool RedBlackTree::isDoubleRed(Node *cur_node) {
+  if (cur_node->color == 'B') {
+    return false;
+  }
+  if (cur_node->parent_node == nullptr) {
+    return false;
+  }
+  return (cur_node->parent_node->color == 'R');
+}
+
+SearchResult RedBlackTree::searchParentOrSelf(Node *cur_node,
+                                              const pair<int, string> &key) {
+  if (cur_node == nullptr) {
+    return SearchResult(nullptr, 'E');
+  }
+
+  if (comparator(cur_node->key, key) > 0) {
+    if (cur_node->left_child != nullptr) {
+      return searchParentOrSelf(cur_node->left_child, key);
+    }
+    return SearchResult(cur_node, 'L');
+  }
+  if (comparator(cur_node->key, key) < 0) {
+    if (cur_node->right_child != nullptr) {
+      return searchParentOrSelf(cur_node->right_child, key);
+    }
+    return SearchResult(cur_node, 'R');
+  }
+  // { If it's already exist, return self node. }
+  return SearchResult(cur_node, 'A');
+}
+
+int RedBlackTree::comparator(const pair<int, string> &comp1,
+                             const pair<int, string> &comp2) {
+  if (comp1.first < comp2.first) {
+    return -1;
+  }
+  if (comp1.first > comp2.first) {
+    return 1;
+  }
+  // { comp1.first == comp2.first }
+  if (comp1.second < comp2.second) {
+    return -1;
+  }
+  if (comp1.second > comp2.second) {
+    return 1;
+  }
+  return 0;
+}
+
+void RedBlackTree::printStatusAfterInsert(Node *inserted_node,
+                                          const bool &node_status) {
+  int depth = getNodeDepth(inserted_node);
+  cout << depth << " " << node_status << "\n";
+}
+
+void RedBlackTree::handleEmptyInsert(const int &sid, const string &subject,
+                                     Node *new_node) {
+  insertToMaps(sid, subject, new_node);
+
+  new_node->color = 'B';
+  tree_root = new_node;
+  tree_size++;
+  printStatusAfterInsert(tree_root, false);
+}
+
+void RedBlackTree::handleNewInsert(const int &sid, const string &subject,
+                                   Node *parent, char direction, Node *child) {
+  child->parent_node = parent;
+  if (direction == 'L')
+    parent->left_child = child;
+  if (direction == 'R')
+    parent->right_child = child;
+  tree_size++;
+  insertToMaps(sid, subject, child);
+
+  Node *cur_node = child;
+  rebalance(cur_node);
+  printStatusAfterInsert(child, false);
+}
+
+void RedBlackTree::handleDuplicateNode(Node *existing_node,
+                                       const int &new_timestamp) {
+  existing_node->timestamp = new_timestamp;
+  printStatusAfterInsert(existing_node, true);
+}
+
+void RedBlackTree::insertToMaps(const int &sid, const string &subject,
+                                Node *new_node) {
+  insertStudentToSidMap(sid, subject, new_node);
+  insertStudentToSubjectMap(subject, new_node);
+}
+
+void RedBlackTree::insertStudentToSidMap(const int &sid, const string &subject,
+                                         Node *new_node) {
+  pair<string, Node *> new_node_pair(subject, new_node);
+
+  if (sid_map.find(sid) != sid_map.end()) {
+    sid_map[sid].push_back(new_node_pair);
+    return;
+  }
+  vector<pair<string, Node *>> new_node_vector;
+  new_node_vector.push_back(new_node_pair);
+  sid_map.insert({sid, new_node_vector});
+}
+
+void RedBlackTree::insertStudentToSubjectMap(const string &subject,
+                                             Node *new_node) {
+  if (subject_map.find(subject) == subject_map.end()) {
+    vector<Node *> new_vector;
+
+    new_vector.push_back(new_node);
+
+    subject_map.insert({subject, new_vector});
+    return;
+  }
+  vector<Node *> &subject_vector = subject_map[subject];
+  if (find(subject_vector.begin(), subject_vector.end(), new_node) ==
+      subject_vector.end()) {
+    subject_map[subject].push_back(new_node);
+  }
+}
+
+void RedBlackTree::restructure(Node *cur_node) {
+  Node *par_node = cur_node->parent_node;
+  Node *grand_par_node = par_node->parent_node;
+
+  if (grand_par_node->right_child == par_node) {
+    // RL
+    if (par_node->left_child == cur_node) {
+      cur_node->color = 'B';
+      par_node->color = 'R';
+      grand_par_node->color = 'R';
+      rotateRight(par_node);
+      rotateLeft(grand_par_node);
+    }
+    // RR
+    else {
+      par_node->color = 'B';
+      cur_node->color = 'R';
+      grand_par_node->color = 'R';
+      rotateLeft(grand_par_node);
+    }
+  } else {
+    // LL
+    if (par_node->left_child == cur_node) {
+      par_node->color = 'B';
+      cur_node->color = 'R';
+      grand_par_node->color = 'R';
+      rotateRight(grand_par_node);
+    }
+    // LR
+    else {
+      cur_node->color = 'B';
+      par_node->color = 'R';
+      grand_par_node->color = 'R';
+      rotateLeft(par_node);
+      rotateRight(grand_par_node);
+    }
+  }
+}
+
+Node *RedBlackTree::recolor(Node *cur_node) {
+  Node *par_node = cur_node->parent_node;
+  Node *grand_par_node = par_node->parent_node;
+
+  exchangeColor(grand_par_node);
+  exchangeColor(par_node);
+  exchangeColor(getSibling(par_node));
+
+  if (grand_par_node == tree_root && grand_par_node->color == 'R') {
+    grand_par_node->color = 'B';
+  }
+  return grand_par_node;
+}
+
+void RedBlackTree::rotateRight(Node *old_root) {
+  Node *new_root = old_root->left_child;
+  Node *middle_subtree = new_root->right_child;
+
+  new_root->right_child = old_root;
+  old_root->left_child = middle_subtree;
+
+  if (middle_subtree) {
+    middle_subtree->parent_node = old_root;
+  }
+  new_root->parent_node = old_root->parent_node;
+  old_root->parent_node = new_root;
+
+  if (new_root->parent_node) {
+    if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+      new_root->parent_node->right_child = new_root;
+    }
+    if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+      new_root->parent_node->left_child = new_root;
+    }
+  }
+
+  if (new_root->parent_node == nullptr) {
+    tree_root = new_root;
+  }
+}
+
+void RedBlackTree::rotateLeft(Node *old_root) {
+  Node *new_root = old_root->right_child;
+  Node *middle_subtree = new_root->left_child;
+
+  new_root->left_child = old_root;
+  old_root->right_child = middle_subtree;
+
+  if (middle_subtree) {
+    middle_subtree->parent_node = old_root;
+  }
+  new_root->parent_node = old_root->parent_node;
+  old_root->parent_node = new_root;
+
+  if (new_root->parent_node) {
+    if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+      new_root->parent_node->right_child = new_root;
+    }
+    if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+      new_root->parent_node->left_child = new_root;
+    }
+  }
+
+  if (new_root->parent_node == nullptr) {
+    tree_root = new_root;
+  }
+}
+
+void RedBlackTree::exchangeColor(Node *node) {
+  char cur_color = node->color;
+  switch (cur_color) {
+  case 'R':
+    node->color = 'B';
+    break;
+  case 'B':
+    node->color = 'R';
+    break;
+  }
+}
+
+void RedBlackTree::rebalance(Node *cur_node) {
+  while (isDoubleRed(cur_node)) {
+    if (isBlack(getSibling(cur_node->parent_node))) {
+      restructure(cur_node);
+      break;
+    } else {
+      cur_node = recolor(cur_node);
+    }
+  }
+}
+
+Node *RedBlackTree::getSibling(Node *cur_node) {
+  Node *par_node = cur_node->parent_node;
+  if (par_node->left_child == cur_node) {
+    return par_node->right_child;
+  }
+  return par_node->left_child;
+}
+
+int RedBlackTree::getNodeDepth(Node *cur_node) {
+  int depth = 0;
+  while (cur_node->parent_node != nullptr) {
+    cur_node = cur_node->parent_node;
+    depth++;
+  }
+  return depth;
+}
 
 int main() {
   std::ios_base::sync_with_stdio(false);
@@ -440,7 +512,8 @@ int main() {
 
       cin >> sid >> subject >> sname >> semester >> phone >> timestamp;
 
-      red_black_tree->insert(sid, subject, sname, semester, phone, timestamp);
+      red_black_tree->inquireInsert(sid, subject, sname, semester, phone,
+                                    timestamp);
 
       continue;
     }

@@ -19,7 +19,7 @@ TEST(RBTDoubleRed, Test1) {
 
   RedBlackTree *rbt = new RedBlackTree();
 
-  bool isDoubleRed = rbt->doubleRed(node1);
+  bool isDoubleRed = rbt->isDoubleRed(node1);
   EXPECT_EQ(isDoubleRed, false);
 }
 
@@ -30,7 +30,7 @@ TEST(RBTDoubleRed, Test2) {
 
   RedBlackTree *rbt = new RedBlackTree();
 
-  bool isDoubleRed = rbt->doubleRed(node1);
+  bool isDoubleRed = rbt->isDoubleRed(node1);
   EXPECT_EQ(isDoubleRed, false);
 }
 
@@ -46,7 +46,7 @@ TEST(RBTDoubleRed, Test3) {
 
   RedBlackTree *rbt = new RedBlackTree();
 
-  bool isDoubleRed = rbt->doubleRed(node2);
+  bool isDoubleRed = rbt->isDoubleRed(node2);
   EXPECT_EQ(isDoubleRed, true);
 }
 
@@ -63,7 +63,7 @@ TEST(RBTDoubleRed, Test4) {
 
   RedBlackTree *rbt = new RedBlackTree();
 
-  bool isDoubleRed = rbt->doubleRed(node2);
+  bool isDoubleRed = rbt->isDoubleRed(node2);
   EXPECT_EQ(isDoubleRed, false);
 }
 

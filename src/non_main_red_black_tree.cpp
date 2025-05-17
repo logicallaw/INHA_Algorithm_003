@@ -74,7 +74,7 @@ public:
     tree_size++;
 
     // Check ordering condition.
-    while (doubleRed(new_node)) {
+    while (isDoubleRed(new_node)) {
       if (isBlack(sibling(new_node->parent_node))) {
         new_node = restructure(new_node);
         return;
@@ -123,7 +123,7 @@ public:
     }
   }
 
-  bool doubleRed(Node *cur_node) {
+  bool isDoubleRed(Node *cur_node) {
     if (cur_node->color == 'B') {
       return false;
     }
