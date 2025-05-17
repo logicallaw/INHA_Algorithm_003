@@ -43,10 +43,10 @@
 
 4. Execute the program:
     ```bash
-    ./runner
+    ./003_12210795_KimJunHo
     ```
 
 5. Etc./ shortcut command:
    ```
-   cmake .. && make && ./runner
+   cmake .. && make && ./003_12210795_KimJunHo
    ```
