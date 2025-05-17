@@ -53,11 +53,8 @@ public:
   void inquireInsert(const int &sid, const string &subject, const string &sname,
                      const int &semester, const string &phone,
                      const int &timestamp);
-
   void inquireAllSubjects(const int &sid);
-
   void inquireStudentNumberOfSubject(const string &subject);
-
   void inquireEarlyStudent(const string &subject, const int &k);
 
 private:
@@ -77,6 +74,9 @@ private:
   bool isDuplicateKey(const pair<int, string> &a, const pair<int, string> &b);
   bool isBlack(Node *sibling_node);
   bool isDoubleRed(Node *cur_node);
+
+  Node *getSibling(Node *cur_node);
+  int getNodeDepth(Node *cur_node);
 
   SearchResult searchParentOrSelf(Node *cur_node, const pair<int, string> &key);
   int comparator(const pair<int, string> &comp1,
@@ -100,9 +100,6 @@ private:
   void rotateRight(Node *old_root);
   void rotateLeft(Node *old_root);
   void filpColor(Node *node);
-
-  Node *getSibling(Node *cur_node);
-  int getNodeDepth(Node *cur_node);
 
   Node *tree_root;
   int tree_size;
@@ -240,6 +237,23 @@ bool RedBlackTree::isDoubleRed(Node *cur_node) {
     return false;
   }
   return (cur_node->parent_node->color == 'R');
+}
+
+Node *RedBlackTree::getSibling(Node *cur_node) {
+  Node *par_node = cur_node->parent_node;
+  if (par_node->left_child == cur_node) {
+    return par_node->right_child;
+  }
+  return par_node->left_child;
+}
+
+int RedBlackTree::getNodeDepth(Node *cur_node) {
+  int depth = 0;
+  while (cur_node->parent_node != nullptr) {
+    cur_node = cur_node->parent_node;
+    depth++;
+  }
+  return depth;
 }
 
 SearchResult RedBlackTree::searchParentOrSelf(Node *cur_node,
@@ -484,23 +498,6 @@ void RedBlackTree::filpColor(Node *node) {
     node->color = 'R';
     break;
   }
-}
-
-Node *RedBlackTree::getSibling(Node *cur_node) {
-  Node *par_node = cur_node->parent_node;
-  if (par_node->left_child == cur_node) {
-    return par_node->right_child;
-  }
-  return par_node->left_child;
-}
-
-int RedBlackTree::getNodeDepth(Node *cur_node) {
-  int depth = 0;
-  while (cur_node->parent_node != nullptr) {
-    cur_node = cur_node->parent_node;
-    depth++;
-  }
-  return depth;
 }
 
 int main() {
