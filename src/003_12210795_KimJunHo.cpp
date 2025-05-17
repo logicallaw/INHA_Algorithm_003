@@ -64,11 +64,11 @@ private:
   static bool subjectNameLess(const pair<string, Node *> &a,
                               const pair<string, Node *> &b);
   static bool timestampLess(Node *&a, Node *&b);
-  static constexpr int kRootDepth = 0;
-  static constexpr bool kIsExistingNode = false;
-  static constexpr int kNotExistedNode = 1;
+  static constexpr bool kIsDuplicateNode = true;
+  static constexpr bool kIsNewlyInserted = false;
   static constexpr const char *kUnexpectedErrorMessage =
       "Algorithm error! You must solve this problem.";
+  static constexpr const char *kNoRecordsFoundMessage = "No records found";
 
   bool isEmpty() const;
   bool isDuplicateKey(const pair<int, string> &a, const pair<int, string> &b);
@@ -78,7 +78,7 @@ private:
   SearchResult searchParentOrSelf(Node *cur_node, const pair<int, string> &key);
   int comparator(const pair<int, string> &comp1,
                  const pair<int, string> &comp2);
-  void printStatusAfterInsert(Node *inserted_node, const bool &node_status);
+  void printNodeStatus(Node *node, const bool &status);
 
   void handleEmptyInsert(const int &sid, const string &subject, Node *new_node);
   void handleNewInsert(const int &sid, const string &subject, Node *parent,
@@ -116,6 +116,11 @@ Node::Node(const int &sid, const string &subject, const string &sname,
 RedBlackTree::RedBlackTree()
     : tree_root(nullptr), tree_size(0), sid_map({}), subject_map({}) {}
 
+constexpr bool RedBlackTree::kIsDuplicateNode;
+constexpr bool RedBlackTree::kIsNewlyInserted;
+constexpr const char *RedBlackTree::kUnexpectedErrorMessage;
+constexpr const char *RedBlackTree::kNoRecordsFoundMessage;
+
 void RedBlackTree::inquireInsert(const int &sid, const string &subject,
                                  const string &sname, const int &semester,
                                  const string &phone, const int &timestamp) {
@@ -135,8 +140,6 @@ void RedBlackTree::inquireInsert(const int &sid, const string &subject,
     cout << kUnexpectedErrorMessage << "\n";
     return;
   }
-
-  bool does_exist_new_node = false;
 
   if (isDuplicateKey(parent_or_self->key, new_node->key)) {
     handleDuplicateNode(parent_or_self, timestamp);
@@ -161,7 +164,7 @@ void RedBlackTree::inquireAllSubjects(const int &sid) {
 
     return;
   }
-  cout << "No records found\n";
+  cout << kNoRecordsFoundMessage << "\n";
 }
 
 void RedBlackTree::inquireStudentNumberOfSubject(const string &subject) {
@@ -273,10 +276,9 @@ int RedBlackTree::comparator(const pair<int, string> &comp1,
   return 0;
 }
 
-void RedBlackTree::printStatusAfterInsert(Node *inserted_node,
-                                          const bool &node_status) {
-  int depth = getNodeDepth(inserted_node);
-  cout << depth << " " << node_status << "\n";
+void RedBlackTree::printNodeStatus(Node *node, const bool &status) {
+  int depth = getNodeDepth(node);
+  cout << depth << " " << status << "\n";
 }
 
 void RedBlackTree::handleEmptyInsert(const int &sid, const string &subject,
@@ -286,7 +288,7 @@ void RedBlackTree::handleEmptyInsert(const int &sid, const string &subject,
   new_node->color = 'B';
   tree_root = new_node;
   tree_size++;
-  printStatusAfterInsert(tree_root, false);
+  printNodeStatus(tree_root, kIsNewlyInserted);
 }
 
 void RedBlackTree::handleNewInsert(const int &sid, const string &subject,
@@ -301,13 +303,13 @@ void RedBlackTree::handleNewInsert(const int &sid, const string &subject,
 
   Node *cur_node = child;
   adjustRebalance(cur_node);
-  printStatusAfterInsert(child, false);
+  printNodeStatus(child, kIsNewlyInserted);
 }
 
 void RedBlackTree::handleDuplicateNode(Node *existing_node,
                                        const int &new_timestamp) {
   existing_node->timestamp = new_timestamp;
-  printStatusAfterInsert(existing_node, true);
+  printNodeStatus(existing_node, kIsDuplicateNode);
 }
 
 void RedBlackTree::insertToMaps(const int &sid, const string &subject,
