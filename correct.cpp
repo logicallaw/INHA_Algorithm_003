@@ -69,6 +69,9 @@ private:
   static constexpr const char *kUnexpectedErrorMessage =
       "Algorithm error! You must solve this problem.";
   static constexpr const char *kNoRecordsFoundMessage = "No records found";
+  static constexpr int kCompareLess = -1;
+  static constexpr int kCompareEqual = 0;
+  static constexpr int kCompareGreater = 1;
 
   bool isEmpty() const;
   bool isDuplicateKey(const pair<int, string> &a, const pair<int, string> &b);
@@ -120,6 +123,9 @@ constexpr bool RedBlackTree::kIsDuplicateNode;
 constexpr bool RedBlackTree::kIsNewlyInserted;
 constexpr const char *RedBlackTree::kUnexpectedErrorMessage;
 constexpr const char *RedBlackTree::kNoRecordsFoundMessage;
+constexpr int RedBlackTree::kCompareLess;
+constexpr int RedBlackTree::kCompareEqual;
+constexpr int RedBlackTree::kCompareGreater;
 
 void RedBlackTree::inquireInsert(const int &sid, const string &subject,
                                  const string &sname, const int &semester,
@@ -242,13 +248,13 @@ SearchResult RedBlackTree::searchParentOrSelf(Node *cur_node,
     return SearchResult(nullptr, 'E');
   }
 
-  if (comparator(cur_node->key, key) > 0) {
+  if (comparator(cur_node->key, key) == kCompareGreater) {
     if (cur_node->left_child != nullptr) {
       return searchParentOrSelf(cur_node->left_child, key);
     }
     return SearchResult(cur_node, 'L');
   }
-  if (comparator(cur_node->key, key) < 0) {
+  if (comparator(cur_node->key, key) == kCompareLess) {
     if (cur_node->right_child != nullptr) {
       return searchParentOrSelf(cur_node->right_child, key);
     }
@@ -261,19 +267,19 @@ SearchResult RedBlackTree::searchParentOrSelf(Node *cur_node,
 int RedBlackTree::comparator(const pair<int, string> &comp1,
                              const pair<int, string> &comp2) {
   if (comp1.first < comp2.first) {
-    return -1;
+    return kCompareLess;
   }
   if (comp1.first > comp2.first) {
-    return 1;
+    return kCompareGreater;
   }
   // { comp1.first == comp2.first }
   if (comp1.second < comp2.second) {
-    return -1;
+    return kCompareLess;
   }
   if (comp1.second > comp2.second) {
-    return 1;
+    return kCompareGreater;
   }
-  return 0;
+  return kCompareEqual;
 }
 
 void RedBlackTree::printNodeStatus(Node *node, const bool &status) {
@@ -426,10 +432,11 @@ void RedBlackTree::rotateRight(Node *old_root) {
   old_root->parent_node = new_root;
 
   if (new_root->parent_node) {
-    if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+    if (comparator(new_root->parent_node->key, new_root->key) == kCompareLess) {
       new_root->parent_node->right_child = new_root;
     }
-    if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+    if (comparator(new_root->parent_node->key, new_root->key) ==
+        kCompareGreater) {
       new_root->parent_node->left_child = new_root;
     }
   }
@@ -453,10 +460,11 @@ void RedBlackTree::rotateLeft(Node *old_root) {
   old_root->parent_node = new_root;
 
   if (new_root->parent_node) {
-    if (comparator(new_root->parent_node->key, new_root->key) < 0) {
+    if (comparator(new_root->parent_node->key, new_root->key) == kCompareLess) {
       new_root->parent_node->right_child = new_root;
     }
-    if (comparator(new_root->parent_node->key, new_root->key) > 0) {
+    if (comparator(new_root->parent_node->key, new_root->key) ==
+        kCompareGreater) {
       new_root->parent_node->left_child = new_root;
     }
   }
