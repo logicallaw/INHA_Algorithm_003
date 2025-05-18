@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(GTest REQUIRED)
 
 # Red-Black Tree
-add_executable(INHA_Algorithm_003 src/003_12210795_KimJunHo.cpp)
+add_executable(INHA_Algorithm_003 src/red_black_tree.cpp)
 
 # Test codes (Based on Non-main Red-Black Tree version.)
 add_executable(RBTComparatorTest test/comparator_test.cpp)

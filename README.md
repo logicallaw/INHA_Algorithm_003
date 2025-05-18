@@ -43,10 +43,10 @@
 
 4. Execute the program:
     ```bash
-    ./003_12210795_KimJunHo
+    ./INHA_Algorithm_003
     ```
 
 5. Etc./ shortcut command:
    ```
-   cmake .. && make && ./003_12210795_KimJunHo
+   cmake .. && make && ./INHA_Algorithm_003
    ```
