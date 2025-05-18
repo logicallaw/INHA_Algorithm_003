@@ -6,12 +6,14 @@
  * https://opensource.org/license/mit
  * Author: Junho Kim
  * Latest Updated Date: 2025-05-18
+ *
+ * NOTE: This file is under active maintenance as of May 18, 2025.
  */
 #include <algorithm>
 #include <iostream>
 #include <map>
 #include <string>
-#include <vector>
+#include <vector>√
 using namespace std;
 
 class Node;
