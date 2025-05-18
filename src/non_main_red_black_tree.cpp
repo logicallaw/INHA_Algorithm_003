@@ -1,4 +1,4 @@
-// WARNING: This file is deprecated and no longer maintained as of May 18, 2025.
+// WARNING: This file is deprecated and no longer maintained as of May 17, 2025.
 // Do not modify unless absolutely necessary.
 // Future support or updates are not guaranteed.
 /*
@@ -8,7 +8,7 @@
  * For full license text, see the LICENSE file in the root directory or at
  * https://opensource.org/license/mit
  * Author: Junho Kim
- * Latest Updated Date: 2025-05-18
+ * Latest Updated Date: 2025-05-17
  */
 #include <iostream>
 #include <string>
