@@ -8,9 +8,9 @@
  * For full license text, see the LICENSE file in the root directory or at
  * https://opensource.org/license/mit
  * Author: Junho Kim
- * Latest Updated Date: 2025-05-17
+ * Latest Updated Date: 2025-05-19
  */
-#include "../src/non_main_red_black_tree.cpp"
+#include "../../src/design_assignment_01/non_main_red_black_tree.cpp"
 #include <gtest/gtest.h>
 
 // Case1: if cur_node->color is 'B',
