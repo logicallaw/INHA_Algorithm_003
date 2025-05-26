@@ -24,3 +24,5 @@ target_link_libraries(RBTDoubleRedTest ${GTEST_LIBRARIES} pthread)
 
 add_executable(RBTBinarySearchTest test/design_assignment_01/binary_search_test.cpp)
 target_link_libraries(RBTBinarySearchTest ${GTEST_LIBRARIES} pthread)
+
+add_executable(KMP_Algorithm others/kmp_algorithm.cpp)
