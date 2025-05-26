@@ -10,17 +10,17 @@ find_package(GTest REQUIRED)
 add_executable(INHA_Algorithm_003 src/design_assignment_01/red_black_tree.cpp)
 
 # Test codes (Based on Non-main Red-Black Tree version.)
-add_executable(RBTComparatorTest test/comparator_test.cpp)
+add_executable(RBTComparatorTest test/design_assignment_01/comparator_test.cpp)
 target_link_libraries(RBTComparatorTest ${GTEST_LIBRARIES} pthread)
 
-add_executable(RBTSiblingTest test/sibling_test.cpp)
+add_executable(RBTSiblingTest test/design_assignment_01/sibling_test.cpp)
 target_link_libraries(RBTSiblingTest ${GTEST_LIBRARIES} pthread)
 
-add_executable(RBTIsBlackTest test/is_black_test.cpp)
+add_executable(RBTIsBlackTest test/design_assignment_01/is_black_test.cpp)
 target_link_libraries(RBTIsBlackTest ${GTEST_LIBRARIES} pthread)
 
-add_executable(RBTDoubleRedTest test/double_red_test.cpp)
+add_executable(RBTDoubleRedTest test/design_assignment_01/double_red_test.cpp)
 target_link_libraries(RBTDoubleRedTest ${GTEST_LIBRARIES} pthread)
 
-add_executable(RBTBinarySearchTest test/binary_search_test.cpp)
+add_executable(RBTBinarySearchTest test/design_assignment_01/binary_search_test.cpp)
 target_link_libraries(RBTBinarySearchTest ${GTEST_LIBRARIES} pthread)
