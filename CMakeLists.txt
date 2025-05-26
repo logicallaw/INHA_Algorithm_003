@@ -25,4 +25,10 @@ target_link_libraries(RBTDoubleRedTest ${GTEST_LIBRARIES} pthread)
 add_executable(RBTBinarySearchTest test/design_assignment_01/binary_search_test.cpp)
 target_link_libraries(RBTBinarySearchTest ${GTEST_LIBRARIES} pthread)
 
+
+# KMP Algorithm
 add_executable(KMP_Algorithm others/kmp_algorithm.cpp)
+
+
+# Boyer-Moore Algorithm
+add_executable(BoyerMooreAlgorithm others/boyer_moore_algorithm.cpp)
