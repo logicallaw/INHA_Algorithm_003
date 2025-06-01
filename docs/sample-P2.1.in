@@ -1,0 +1,25 @@
+7
+Andong 50
+Busan 100
+Changnyeong 30
+Daegu 0
+Ulsan 0
+Changwon 100
+Gyeongju 150
+15
+Andong Busan 8000 1991-01
+Andong Changnyeong 5000 1996-12
+Andong Daegu 9000 1997-01
+Busan Changnyeong 10000 1997-01
+Busan Ulsan 12000 1997-01
+Busan Daegu 20000 2002-01
+Changnyeong Daegu 10000 2002-01
+Daegu Ulsan 20000 2002-01
+Changnyeong Changwon 20000 2003-01
+Daegu Changwon 20000 2002-01
+Busan Changwon 20000 2002-01
+Ulsan Gyeongju 25000 2003-01
+Changwon Gyeongju 20000 2002-01
+Changnyeong Ulsan 12000 1997-01
+Gyeongju Daegu 20000 2002-01
+Andong
