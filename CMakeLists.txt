@@ -29,6 +29,8 @@ target_link_libraries(RBTBinarySearchTest ${GTEST_LIBRARIES} pthread)
 # KMP Algorithm
 add_executable(KMP_Algorithm others/kmp_algorithm.cpp)
 
-
 # Boyer-Moore Algorithm
 add_executable(BoyerMooreAlgorithm others/boyer_moore_algorithm.cpp)
+
+# Prim's Algorithm
+add_executable(INHA_Prim_Algorithm_003 src/design_assignment_02/prim_algorithm_v3.cpp)
