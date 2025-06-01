@@ -33,4 +33,4 @@ add_executable(KMP_Algorithm others/kmp_algorithm.cpp)
 add_executable(BoyerMooreAlgorithm others/boyer_moore_algorithm.cpp)
 
 # Prim's Algorithm
-add_executable(INHA_Prim_Algorithm_003 src/design_assignment_02/prim_algorithm_v3.cpp)
+add_executable(INHA_Prim_Algorithm_003 src/design_assignment_02/prim_algorithm.cpp)
